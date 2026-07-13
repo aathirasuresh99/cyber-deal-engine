@@ -1,0 +1,11 @@
+company_name,domain,sector,notes
+Razorpay,razorpay.com,fintech,payments; handles cardholder data; PCI-DSS scope
+Zerodha,zerodha.com,fintech,retail broking; SEBI-regulated; large user base
+CRED,cred.club,fintech,credit/payments; sensitive financial data
+Freshworks,freshworks.com,saas,CX/CRM SaaS; multi-tenant; global customers
+Postman,postman.com,saas,API platform; developer secrets in scope
+BrowserStack,browserstack.com,saas,testing infra; access to customer test data
+Zoho,zoho.com,saas,broad SaaS suite; self-hosted data centers
+Groww,groww.in,fintech,investing app; KYC + financial data
+Cashfree,cashfree.com,fintech,payment gateway; PCI-DSS scope
+Chargebee,chargebee.com,saas,subscription billing; stores billing data
