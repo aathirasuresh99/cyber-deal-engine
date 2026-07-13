@@ -17,9 +17,15 @@ def build_system(profile: MarketProfile) -> str:
         "RULES:\n"
         "1. Lead with breach and vulnerability signals (the hero). Treat compliance exposure "
         f"(e.g. {frameworks}) as a strong secondary angle. Keep tech-stack speculation minimal.\n"
-        "2. Use ONLY facts present in the provided context. NEVER invent breaches, CVEs, dates, or numbers.\n"
-        "3. If the context contains no real, relevant signal, set has_signal=false, and make key_points "
-        "generic discovery angles (not fabricated incidents). Do not assert any specific breach.\n"
+        "2. Use ONLY facts present in the provided context. NEVER invent breaches, CVEs, dates, or numbers. "
+        "Do not speculate about the company's security posture, budget, compliance readiness, or the "
+        "security implications of unrelated facts (e.g. a funding round, a new office, a product launch). "
+        "This rule applies to EVERY field, including the opener and the objection questions.\n"
+        "3. If the context contains no real, relevant signal, set has_signal=false. In that case ALL fields "
+        "(key_points, opener, objection_questions) must be fully generic discovery prompts that would apply "
+        "to any prospect — they must NOT reference or draw inferences from anything mentioned in the context. "
+        "Do not assert or imply any specific breach, risk, or need. A generic compliance mention "
+        f"(e.g. {frameworks}) is acceptable background.\n"
         "4. Every brief: exactly 3 key points, 1 opener, 3 objection questions."
     )
 

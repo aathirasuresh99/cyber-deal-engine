@@ -1,0 +1,225 @@
+{
+  "summary": {
+    "cases_total": 10,
+    "cases_scored": 10,
+    "cases_errored": 0,
+    "no_hallucination_rate": 1.0,
+    "has_signal_accuracy": 1.0,
+    "judge_faithfulness_avg": 4.3
+  },
+  "rows": [
+    {
+      "id": "breach-clear",
+      "category": "clear_breach",
+      "company": "NimbusPay",
+      "expect_has_signal": true,
+      "got_has_signal": true,
+      "checks": {
+        "has_signal_correct": true,
+        "no_forbidden": true,
+        "no_fabricated_cve": true
+      },
+      "clean": true,
+      "judge": {
+        "faithfulness": 5,
+        "relevance": 5,
+        "actionability": 5,
+        "unsupported_claims": [],
+        "rationale": "The brief accurately reflects the context provided, mentioning the ransomware attack on NimbusPay and the exfiltration of 1.2 million customer records, including KYC documents. It also appropriately discusses the implications for data protection and compliance, which are relevant and actionable points for a sales meeting."
+      }
+    },
+    {
+      "id": "cve-clear",
+      "category": "clear_cve",
+      "company": "HydraCRM",
+      "expect_has_signal": true,
+      "got_has_signal": true,
+      "checks": {
+        "has_signal_correct": true,
+        "no_forbidden": true,
+        "no_fabricated_cve": true
+      },
+      "clean": true,
+      "judge": {
+        "faithfulness": 5,
+        "relevance": 5,
+        "actionability": 5,
+        "unsupported_claims": [],
+        "rationale": "The brief accurately reflects the context provided, mentioning the CVE-2025-40881, its impact, and the affected versions. It also appropriately discusses the relevance of compliance with data protection regulations, which is a valid generic angle. No unsupported claims are present."
+      }
+    },
+    {
+      "id": "multi-signal",
+      "category": "multiple_signals",
+      "company": "OrbitLedger",
+      "expect_has_signal": true,
+      "got_has_signal": true,
+      "checks": {
+        "has_signal_correct": true,
+        "no_forbidden": true,
+        "no_fabricated_cve": true
+      },
+      "clean": true,
+      "judge": {
+        "faithfulness": 5,
+        "relevance": 5,
+        "actionability": 5,
+        "unsupported_claims": [],
+        "rationale": "The brief accurately reflects the context provided, mentioning the credential-stuffing incident and the CVE-2026-11902 with its CVSS score. It also appropriately discusses potential compliance concerns, which is a valid generic angle. All claims are supported by the context."
+      }
+    },
+    {
+      "id": "no-signal-empty",
+      "category": "no_signal",
+      "company": "BlankSoft",
+      "expect_has_signal": false,
+      "got_has_signal": false,
+      "checks": {
+        "has_signal_correct": true,
+        "no_forbidden": true,
+        "no_fabricated_cve": true
+      },
+      "clean": true,
+      "judge": {
+        "faithfulness": 5,
+        "relevance": 5,
+        "actionability": 5,
+        "unsupported_claims": [],
+        "rationale": "The brief does not assert any specific facts or incidents that are not supported by the context, as the context is empty. It focuses on generic cybersecurity strategies and compliance, which are acceptable topics. Therefore, it is fully faithful to the context provided."
+      }
+    },
+    {
+      "id": "no-signal-marketing",
+      "category": "no_signal",
+      "company": "MarketBloom",
+      "expect_has_signal": false,
+      "got_has_signal": false,
+      "checks": {
+        "has_signal_correct": true,
+        "no_forbidden": true,
+        "no_fabricated_cve": true
+      },
+      "clean": true,
+      "judge": {
+        "faithfulness": 3,
+        "relevance": 4,
+        "actionability": 4,
+        "unsupported_claims": [
+          "Explore MarketBloom's current cybersecurity posture as they expand operations with a new office in Pune, which may introduce new security challenges.",
+          "Evaluate MarketBloom's readiness to meet CERT-In's incident-reporting requirements, considering their expanding footprint and increased data processing."
+        ],
+        "rationale": "The brief makes assumptions about cybersecurity challenges and compliance needs related to MarketBloom's expansion that are not explicitly supported by the context. The context only mentions the opening of a new office and hiring plans, without any specific reference to cybersecurity or compliance issues. However, the mention of India's DPDP Act is a generic compliance angle and is acceptable."
+      }
+    },
+    {
+      "id": "noisy-misattributed",
+      "category": "noise_resistance",
+      "company": "PineVault",
+      "expect_has_signal": true,
+      "got_has_signal": true,
+      "checks": {
+        "has_signal_correct": true,
+        "no_forbidden": true,
+        "no_fabricated_cve": true
+      },
+      "clean": true,
+      "judge": {
+        "faithfulness": 5,
+        "relevance": 5,
+        "actionability": 5,
+        "unsupported_claims": [],
+        "rationale": "The brief accurately reflects the context provided, specifically mentioning the CVE-2026-20551 path traversal vulnerability in PineVault's Backup Agent with the correct CVSS score. It also appropriately discusses compliance with India's DPDP Act and CERT-In guidelines, which are relevant and generic compliance angles. No unsupported claims are present."
+      }
+    },
+    {
+      "id": "vague-incident",
+      "category": "hallucination_trap",
+      "company": "TideBank",
+      "expect_has_signal": true,
+      "got_has_signal": true,
+      "checks": {
+        "has_signal_correct": true,
+        "no_forbidden": true,
+        "no_fabricated_cve": true
+      },
+      "clean": true,
+      "judge": {
+        "faithfulness": 3,
+        "relevance": 5,
+        "actionability": 4,
+        "unsupported_claims": [
+          "The lack of detail in TideBank's disclosure could imply a significant breach or ongoing investigation, raising concerns about data protection and transparency."
+        ],
+        "rationale": "The brief accurately mentions the 'security incident' communicated by TideBank, which is supported by the context. However, it speculates on the implications of the lack of detail, suggesting a significant breach or ongoing investigation, which is not supported by the context. The rest of the brief is relevant and actionable, focusing on compliance and data protection."
+      }
+    },
+    {
+      "id": "stale-but-real-cve",
+      "category": "clear_cve",
+      "company": "Fernshop",
+      "expect_has_signal": true,
+      "got_has_signal": true,
+      "checks": {
+        "has_signal_correct": true,
+        "no_forbidden": true,
+        "no_fabricated_cve": true
+      },
+      "clean": true,
+      "judge": {
+        "faithfulness": 5,
+        "relevance": 5,
+        "actionability": 5,
+        "unsupported_claims": [],
+        "rationale": "The brief accurately reflects the context provided, mentioning the CVE-2022-30190, its CVSS score, and its status as unpatched in EOL versions. It also appropriately discusses the potential risks and compliance issues, which are relevant and actionable points for a sales meeting."
+      }
+    },
+    {
+      "id": "phishing-news",
+      "category": "clear_breach",
+      "company": "CedarHR",
+      "expect_has_signal": true,
+      "got_has_signal": true,
+      "checks": {
+        "has_signal_correct": true,
+        "no_forbidden": true,
+        "no_fabricated_cve": true
+      },
+      "clean": true,
+      "judge": {
+        "faithfulness": 5,
+        "relevance": 5,
+        "actionability": 5,
+        "unsupported_claims": [],
+        "rationale": "The brief accurately reflects the context provided, mentioning the phishing attack on CedarHR and the subsequent password reset. It also appropriately discusses potential vulnerabilities and compliance with data protection regulations, which are relevant and actionable points for a sales meeting."
+      }
+    },
+    {
+      "id": "product-launch-only",
+      "category": "no_signal",
+      "company": "GlideDocs",
+      "expect_has_signal": false,
+      "got_has_signal": false,
+      "checks": {
+        "has_signal_correct": true,
+        "no_forbidden": true,
+        "no_fabricated_cve": true
+      },
+      "clean": true,
+      "judge": {
+        "faithfulness": 2,
+        "relevance": 3,
+        "actionability": 3,
+        "unsupported_claims": [
+          "Explore how GlideDocs is managing security for its new AI writing assistant, especially in terms of data privacy and protection.",
+          "Discuss the implications of their recent funding round on their cybersecurity budget and priorities.",
+          "Evaluate GlideDocs' compliance posture with respect to Indian data protection laws and regulations.",
+          "With GlideDocs' recent launch of an AI writing assistant, how are you ensuring robust data security and privacy for your users?",
+          "How does GlideDocs prioritize cybersecurity amidst rapid feature development and scaling?",
+          "What measures are in place to ensure compliance with Indian data protection regulations?",
+          "How does the recent funding round impact your cybersecurity strategy and investments?"
+        ],
+        "rationale": "The brief makes several assumptions about GlideDocs' security practices, compliance, and budget priorities that are not supported by the context. The context only mentions the launch of an AI feature and a funding round, with no details on security or compliance. Therefore, the brief's claims about security management, compliance, and budget implications are unsupported."
+      }
+    }
+  ]
+}
