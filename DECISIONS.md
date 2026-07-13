@@ -89,3 +89,18 @@ Format: `## [YYYY-MM-DD] Decision title` → **Decision**, **Context**, **Altern
 - SQLite is zero-setup for a bounded watchlist; the `SIGNALS_DB_URL` env override makes the move to Postgres a config change, not a rewrite.
 
 **Revisit if:** GDELT coverage of Indian mid-market names proves thin → add NewsAPI as a second news ingester (key in `.env`, store/runner unchanged), or add CERT-In per the layered-sources plan.
+
+---
+
+## [2026-07] Eval-driven prompt fix — no-signal speculation
+**Decision:** Tightened the generator's no-signal rules so that when `has_signal=false`, every field (key points, opener, objection questions) must be fully generic and must not draw inferences from unrelated context (funding rounds, new offices, product launches).
+
+**Context:** First eval run scored no-hallucination rate 1.0 and has_signal accuracy 1.0, but judge faithfulness averaged only 4.3/5. The gap was concentrated in three no-signal/vague cases (GlideDocs 2, MarketBloom 3, TideBank 3): the model correctly flagged no-signal, but its discovery questions speculated about security budget, compliance readiness, and breach implications the context never supported.
+
+**Alternatives considered:** Leave it (not a hard fabrication); add a deterministic check for speculation (hard to define precisely); lower temperature.
+
+**Why:** The failure was a soft-faithfulness issue the LLM judge is designed to catch, and the root cause was a prompt that only constrained `key_points`, not the objection questions. One targeted prompt edit was the cheapest, most direct fix.
+
+**Result:** Re-run scored faithfulness 5.0/5 (up from 4.3); no-hallucination rate held at 1.0. Baseline preserved in eval/results_baseline.json for the before/after.
+
+**Revisit if:** later cases show speculation creeping back, or a real signal case gets over-constrained into blandness — then move some of this into few-shot examples rather than rules.
