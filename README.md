@@ -132,19 +132,20 @@ Ablation on the 28-case golden set (Claude judge), plain single pass vs. the age
 |---|---|---|
 | no-hallucination rate | 1.0 | 1.0 |
 | has_signal accuracy | 1.0 | 1.0 |
-| judge faithfulness avg | 4.89 | 4.86 |
+| judge faithfulness avg | 4.89 | 4.96 |
 | hallucinations fixed by reflection | — | **0** |
 
-The honest result: **no measurable gain.** After the Phase 3 prompt hardening there were no
-hallucinations left to fix, so paying ~2× the calls bought nothing here. The agent revised 3
-cases, but all 3 were the critic over-firing on legitimate *risk framing* ("a disclosed
-SQL-injection CVE puts customer data at risk") that the judge — correctly — accepted. That
-disagreement was itself a finding: the critic and judge didn't share a boundary. Both were
-updated to agree — stating the *risk* a disclosed weakness implies is allowed; asserting an event
-*happened* (or inventing a fact/CVE, or misattributing another company's event) is not.
+The honest result: **no hallucinations to fix.** After the Phase 3 prompt hardening the base
+generator is already clean in-distribution, so the loop's north-star payoff is zero here and the
+faithfulness gap (4.89 vs 4.96) is within run-to-run noise. The first ablation run also exposed a
+side issue: the critic was over-firing on legitimate *risk framing* ("a disclosed SQL-injection
+CVE puts customer data at risk") that the judge — correctly — accepted. That disagreement was a
+finding in itself: critic and judge didn't share a boundary. Both were updated to agree — stating
+the *risk* a disclosed weakness implies is allowed; asserting an event *happened* (or inventing a
+fact/CVE, or misattributing another company's event) is not.
 
 The takeaway is the point: **a reflection loop only earns its cost when the base generator
-actually slips.** Knowing when *not* to add complexity is a result worth reporting.
+actually slips.** In-distribution it doesn't, so the interesting test is adversarial inputs.
 
 ### Adversarial: does it help where the prompt is untuned?
 
@@ -152,10 +153,33 @@ To test whether reflection has *latent* value, `eval/golden_adversarial.jsonl` h
 cases the tuned prompt is more likely to miss: multi-company news roundups, similar-name traps
 (`Halcyon Bank` vs `Halcyon Logistics`), a real breach buried among unrelated funding numbers,
 low-severity CVEs that tempt exaggeration, and a competitor's breach sitting next to the
-prospect's own CVE. Run `python -m eval.compare_agent golden_adversarial.jsonl` to measure
-whether the loop's `fixed by reflection` count rises where the single pass falls short.
+prospect's own CVE (`python -m eval.compare_agent golden_adversarial.jsonl`).
 
-_(Adversarial numbers to be filled in from that run.)_
+| metric | plain | agent |
+|---|---|---|
+| no-hallucination rate | 0.6 | 0.8 |
+| has_signal accuracy | 1.0 | 0.9 |
+| judge faithfulness avg | 4.6 | 4.4 |
+
+The aggregates say "north star up, secondary metrics down," but the **per-case trace is the
+honest view** — with only 10 cases and two independently-drafted arms, the aggregates mix loop
+effects with generation noise. What actually happened:
+
+- **Reflection worked (as designed).** On the multi-company roundup, the plain draft pulled a
+  *different* company's breach into the prospect's brief. The critic caught it and the revision
+  removed it — a real dirty→clean fix. This is the failure class the loop targets, and it landed.
+- **Reflection backfired.** On the "buried signal" case, the prospect *had* a real, in-context
+  breach — but surrounded by unrelated funding noise, the critic **false-positived**, flagged the
+  true claim as unsupported, and the loop deleted the real signal (has_signal flipped, faithfulness
+  5→3). An over-eager self-critic can erase truth.
+- **Two other aggregate swings were noise** — they occurred with zero revisions, so they reflect
+  variance between independently generated drafts, not the loop.
+
+The real lesson is sharper than "agents help": **a reflection loop is only as good as its critic's
+precision.** A high-recall / low-precision critic buys hallucination fixes at the cost of erasing
+real signal. Two follow-ups fall out of this directly: (1) raise critic precision so it stops
+flagging in-context claims in noisy multi-company text; (2) fix the ablation confound by having
+both arms share the agent's first draft, isolating the loop's true effect. (See `DECISIONS.md`.)
 
 ## Design decisions
 See `DECISIONS.md` for scope choices and *why* (target market, coverage model, sources, hero insight).

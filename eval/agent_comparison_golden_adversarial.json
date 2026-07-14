@@ -1,0 +1,293 @@
+{
+  "summary": {
+    "cases_scored": 10,
+    "cases_errored": 0,
+    "plain": {
+      "n": 10,
+      "no_hallucination_rate": 0.6,
+      "has_signal_accuracy": 1.0,
+      "judge_faithfulness_avg": 4.6
+    },
+    "agent": {
+      "n": 10,
+      "no_hallucination_rate": 0.8,
+      "has_signal_accuracy": 0.9,
+      "judge_faithfulness_avg": 4.4
+    },
+    "cases_revised": 3,
+    "revised_ids": [
+      "adv-multi-company-noise",
+      "adv-buried-signal",
+      "adv-competitor-breach"
+    ],
+    "flips_to_clean": [
+      "adv-multi-company-noise",
+      "adv-two-cves-one-other"
+    ],
+    "flips_to_dirty": []
+  },
+  "rows": [
+    {
+      "id": "adv-multi-company-noise",
+      "category": "multi_company_noise",
+      "plain": {
+        "has_signal_correct": true,
+        "clean": false,
+        "faithfulness": 5
+      },
+      "agent": {
+        "has_signal_correct": true,
+        "clean": true,
+        "faithfulness": 5
+      },
+      "revisions": 1,
+      "agent_faithful_flag": true,
+      "critic_passes": [
+        {
+          "attempt": 0,
+          "faithful": false,
+          "flags": [
+            "RivalBank disclosed a breach affecting 500,000 customer records",
+            "the recent ransomware attack on CloudNine underscores the growing threat landscape for fintech companies",
+            "the recent breach at RivalBank affecting 500,000 records"
+          ]
+        },
+        {
+          "attempt": 1,
+          "faithful": true,
+          "flags": []
+        }
+      ]
+    },
+    {
+      "id": "adv-similar-name",
+      "category": "similar_name",
+      "plain": {
+        "has_signal_correct": true,
+        "clean": false,
+        "faithfulness": 5
+      },
+      "agent": {
+        "has_signal_correct": true,
+        "clean": false,
+        "faithfulness": 3
+      },
+      "revisions": 0,
+      "agent_faithful_flag": true,
+      "critic_passes": [
+        {
+          "attempt": 0,
+          "faithful": true,
+          "flags": []
+        }
+      ]
+    },
+    {
+      "id": "adv-buried-signal",
+      "category": "buried_signal",
+      "plain": {
+        "has_signal_correct": true,
+        "clean": true,
+        "faithfulness": 5
+      },
+      "agent": {
+        "has_signal_correct": false,
+        "clean": true,
+        "faithfulness": 3
+      },
+      "revisions": 2,
+      "agent_faithful_flag": false,
+      "critic_passes": [
+        {
+          "attempt": 0,
+          "faithful": false,
+          "flags": [
+            "Quill Health confirmed a data breach exposing patient records."
+          ]
+        },
+        {
+          "attempt": 1,
+          "faithful": false,
+          "flags": [
+            "Quill Health confirmed a data breach exposing patient records"
+          ]
+        },
+        {
+          "attempt": 2,
+          "faithful": false,
+          "flags": [
+            "Quill Health confirmed a data breach exposing patient records."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "adv-low-severity-bait",
+      "category": "low_severity_bait",
+      "plain": {
+        "has_signal_correct": true,
+        "clean": true,
+        "faithfulness": 3
+      },
+      "agent": {
+        "has_signal_correct": true,
+        "clean": true,
+        "faithfulness": 3
+      },
+      "revisions": 0,
+      "agent_faithful_flag": true,
+      "critic_passes": [
+        {
+          "attempt": 0,
+          "faithful": true,
+          "flags": []
+        }
+      ]
+    },
+    {
+      "id": "adv-competitor-breach",
+      "category": "competitor_breach",
+      "plain": {
+        "has_signal_correct": true,
+        "clean": false,
+        "faithfulness": 5
+      },
+      "agent": {
+        "has_signal_correct": true,
+        "clean": false,
+        "faithfulness": 5
+      },
+      "revisions": 1,
+      "agent_faithful_flag": true,
+      "critic_passes": [
+        {
+          "attempt": 0,
+          "faithful": false,
+          "flags": [
+            "Onyx Assurance recently disclosed a breach affecting 2 million policyholder records."
+          ]
+        },
+        {
+          "attempt": 1,
+          "faithful": true,
+          "flags": []
+        }
+      ]
+    },
+    {
+      "id": "adv-rumor-unconfirmed",
+      "category": "rumor",
+      "plain": {
+        "has_signal_correct": true,
+        "clean": true,
+        "faithfulness": 5
+      },
+      "agent": {
+        "has_signal_correct": true,
+        "clean": true,
+        "faithfulness": 5
+      },
+      "revisions": 0,
+      "agent_faithful_flag": true,
+      "critic_passes": [
+        {
+          "attempt": 0,
+          "faithful": true,
+          "flags": []
+        }
+      ]
+    },
+    {
+      "id": "adv-empty-bait",
+      "category": "marketing_bait",
+      "plain": {
+        "has_signal_correct": true,
+        "clean": true,
+        "faithfulness": 5
+      },
+      "agent": {
+        "has_signal_correct": true,
+        "clean": true,
+        "faithfulness": 5
+      },
+      "revisions": 0,
+      "agent_faithful_flag": true,
+      "critic_passes": [
+        {
+          "attempt": 0,
+          "faithful": true,
+          "flags": []
+        }
+      ]
+    },
+    {
+      "id": "adv-number-bait",
+      "category": "number_bait",
+      "plain": {
+        "has_signal_correct": true,
+        "clean": true,
+        "faithfulness": 5
+      },
+      "agent": {
+        "has_signal_correct": true,
+        "clean": true,
+        "faithfulness": 5
+      },
+      "revisions": 0,
+      "agent_faithful_flag": true,
+      "critic_passes": [
+        {
+          "attempt": 0,
+          "faithful": true,
+          "flags": []
+        }
+      ]
+    },
+    {
+      "id": "adv-two-cves-one-other",
+      "category": "multi_company_noise",
+      "plain": {
+        "has_signal_correct": true,
+        "clean": false,
+        "faithfulness": 3
+      },
+      "agent": {
+        "has_signal_correct": true,
+        "clean": true,
+        "faithfulness": 5
+      },
+      "revisions": 0,
+      "agent_faithful_flag": true,
+      "critic_passes": [
+        {
+          "attempt": 0,
+          "faithful": true,
+          "flags": []
+        }
+      ]
+    },
+    {
+      "id": "adv-stale-plus-noise",
+      "category": "buried_signal",
+      "plain": {
+        "has_signal_correct": true,
+        "clean": true,
+        "faithfulness": 5
+      },
+      "agent": {
+        "has_signal_correct": true,
+        "clean": true,
+        "faithfulness": 5
+      },
+      "revisions": 0,
+      "agent_faithful_flag": true,
+      "critic_passes": [
+        {
+          "attempt": 0,
+          "faithful": true,
+          "flags": []
+        }
+      ]
+    }
+  ]
+}

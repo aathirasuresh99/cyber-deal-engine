@@ -218,3 +218,23 @@ signal buried in funding noise, low-severity-CVE exaggeration bait, competitor b
 prospect's own CVE, rumor/number bait. compare_agent.py now takes a golden filename arg and
 writes agent_comparison_<stem>.json. Hypothesis under test: reflection's "fixed by reflection"
 count should rise on this slice if its value is real where the prompt is untuned. Run pending.
+
+## [2026-07] Adversarial ablation result: reflection helps AND harms — critic precision is the gate
+Ran plain vs. agent on the 10-case adversarial slice (Claude judge). Aggregates: no-hallucination
+0.6->0.8, has_signal 1.0->0.9, faithfulness 4.6->4.4. Per-case truth (more reliable than
+aggregates at n=10):
+- WIN: adv-multi-company-noise — plain leaked RivalBank/CloudNine facts into Vertex Pay's brief;
+  critic caught all 3, revision removed them (dirty->clean). Reflection did its target job.
+- HARM: adv-buried-signal — Quill Health's breach IS in context but buried in funding noise; the
+  critic false-positived, flagged the true supported claim across all 3 attempts, and the loop
+  deleted the real signal (has_signal True->False, faithfulness 5->3). An over-eager critic erased
+  truth. This is the key finding.
+- NOISE: adv-two-cves-one-other (clean flip) and adv-similar-name (faith drop) both at rev=0 —
+  variance between the two independently drafted arms, not loop effects.
+Conclusion: a reflection loop is only as good as its critic's PRECISION. High recall + low
+precision trades hallucination fixes for erased signal. Two follow-ups:
+  (1) Raise critic precision — stop flagging claims that ARE in the context when the context names
+      multiple companies (verify presence before flagging).
+  (2) Fix ablation confound — have both arms share the agent's attempt-0 draft so the comparison
+      isolates the loop's effect instead of mixing in generation variance.
+Both deferred pending user go-ahead (each needs a live eval run to re-verify).

@@ -12,13 +12,13 @@
       "n": 28,
       "no_hallucination_rate": 1.0,
       "has_signal_accuracy": 1.0,
-      "judge_faithfulness_avg": 4.86
+      "judge_faithfulness_avg": 4.96
     },
     "cases_revised": 3,
     "revised_ids": [
-      "cve-clear",
-      "vague-incident",
-      "phishing-news"
+      "multi-signal",
+      "phishing-news",
+      "phishing-2"
     ],
     "flips_to_clean": [],
     "flips_to_dirty": []
@@ -60,18 +60,11 @@
         "clean": true,
         "faithfulness": 5
       },
-      "revisions": 1,
+      "revisions": 0,
       "agent_faithful_flag": true,
       "critic_passes": [
         {
           "attempt": 0,
-          "faithful": false,
-          "flags": [
-            "The statement 'posing a significant risk of data breaches' is an unsupported assertion as the context does not explicitly mention data breaches, only the vulnerability itself."
-          ]
-        },
-        {
-          "attempt": 1,
           "faithful": true,
           "flags": []
         }
@@ -90,11 +83,18 @@
         "clean": true,
         "faithfulness": 5
       },
-      "revisions": 0,
+      "revisions": 1,
       "agent_faithful_flag": true,
       "critic_passes": [
         {
           "attempt": 0,
+          "faithful": false,
+          "flags": [
+            "indicating a potential security breach"
+          ]
+        },
+        {
+          "attempt": 1,
           "faithful": true,
           "flags": []
         }
@@ -157,7 +157,7 @@
       "agent": {
         "has_signal_correct": true,
         "clean": true,
-        "faithfulness": 4
+        "faithfulness": 5
       },
       "revisions": 0,
       "agent_faithful_flag": true,
@@ -180,22 +180,13 @@
       "agent": {
         "has_signal_correct": true,
         "clean": true,
-        "faithfulness": 5
+        "faithfulness": 4
       },
-      "revisions": 1,
+      "revisions": 0,
       "agent_faithful_flag": true,
       "critic_passes": [
         {
           "attempt": 0,
-          "faithful": false,
-          "flags": [
-            "indicating a potential breach or exposure",
-            "raising concerns about the extent of the issue",
-            "the lack of transparency around the incident may lead to compliance scrutiny"
-          ]
-        },
-        {
-          "attempt": 1,
           "faithful": true,
           "flags": []
         }
@@ -207,12 +198,12 @@
       "plain": {
         "has_signal_correct": true,
         "clean": true,
-        "faithfulness": 3
+        "faithfulness": 5
       },
       "agent": {
         "has_signal_correct": true,
         "clean": true,
-        "faithfulness": 4
+        "faithfulness": 5
       },
       "revisions": 0,
       "agent_faithful_flag": true,
@@ -244,7 +235,7 @@
           "attempt": 0,
           "faithful": false,
           "flags": [
-            "This event highlights potential vulnerabilities in employee training and security awareness."
+            "The incident led to a forced password reset across the organization to mitigate the breach."
           ]
         },
         {
@@ -357,7 +348,7 @@
       "agent": {
         "has_signal_correct": true,
         "clean": true,
-        "faithfulness": 4
+        "faithfulness": 5
       },
       "revisions": 0,
       "agent_faithful_flag": true,
@@ -375,7 +366,7 @@
       "plain": {
         "has_signal_correct": true,
         "clean": true,
-        "faithfulness": 5
+        "faithfulness": 4
       },
       "agent": {
         "has_signal_correct": true,
@@ -398,7 +389,7 @@
       "plain": {
         "has_signal_correct": true,
         "clean": true,
-        "faithfulness": 4
+        "faithfulness": 5
       },
       "agent": {
         "has_signal_correct": true,
@@ -582,7 +573,7 @@
       "plain": {
         "has_signal_correct": true,
         "clean": true,
-        "faithfulness": 5
+        "faithfulness": 4
       },
       "agent": {
         "has_signal_correct": true,
@@ -610,7 +601,7 @@
       "agent": {
         "has_signal_correct": true,
         "clean": true,
-        "faithfulness": 4
+        "faithfulness": 5
       },
       "revisions": 0,
       "agent_faithful_flag": true,
@@ -628,18 +619,26 @@
       "plain": {
         "has_signal_correct": true,
         "clean": true,
-        "faithfulness": 5
+        "faithfulness": 4
       },
       "agent": {
         "has_signal_correct": true,
         "clean": true,
         "faithfulness": 5
       },
-      "revisions": 0,
+      "revisions": 1,
       "agent_faithful_flag": true,
       "critic_passes": [
         {
           "attempt": 0,
+          "faithful": false,
+          "flags": [
+            "AmberDesk has experienced a breach.",
+            "AmberDesk has reset passwords and is currently reviewing access logs to assess the extent of the breach."
+          ]
+        },
+        {
+          "attempt": 1,
           "faithful": true,
           "flags": []
         }
