@@ -179,3 +179,13 @@ on `misattributed-cve`, the brief pitched Larkspur Analytics' CVE to prospect La
 incident belongs to a company only if the context names that same company; a different
 company's event (even a similar name) is not a signal and must not be reframed as third-party
 risk unless the context explicitly ties it to the prospect. Verify on next eval run.
+
+## [2026-07] Phase 4: reflection agent (self-critique loop)
+Added src/critic.py (runtime faithfulness critic: deterministic fabricated-CVE check + LLM
+faithfulness pass returning unsupported_claims) and src/agent.py (draft -> critique -> revise,
+bounded by max_revisions, returns a full trace). The critic applies the same "faithful" standard
+the Phase 3 eval measures, so the agent is held at runtime to exactly what we grade offline —
+the payoff of building the eval first. Loop is crash-safe (returns AgentResult with .error) like
+safe_generate. Control flow verified in sandbox with mocked generate/critique (clean-first-try,
+revise-then-clean with feedback carried, budget-exhausted, graceful fail, deterministic CVE flag).
+Next: eval ablation comparing plain generation vs reflective on the 28-case golden set.

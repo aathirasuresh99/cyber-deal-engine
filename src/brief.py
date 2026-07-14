@@ -45,13 +45,26 @@ SYSTEM = build_system(ACTIVE_MARKET)
 
 
 def generate_brief(company: str, context: str, model: str = DEFAULT_MODEL,
-                   profile: MarketProfile = ACTIVE_MARKET) -> Brief:
-    """Call the model with structured outputs; returns a validated Brief object."""
+                   profile: MarketProfile = ACTIVE_MARKET, feedback: str = "") -> Brief:
+    """Call the model with structured outputs; returns a validated Brief object.
+
+    `feedback` is used by the reflection agent (src/agent.py): on a revision pass it carries the
+    critic's list of unsupported claims, so the model rewrites to remove them rather than starting
+    blind. Empty on a first draft."""
+    user = f"Company: {company}\n\nContext:\n{context or '(no signals provided)'}"
+    if feedback:
+        user += (
+            "\n\nA reviewer flagged the previous draft for these UNSUPPORTED claims — statements the "
+            "context does not back:\n" + feedback +
+            "\n\nRewrite the brief so none of these appear. Remove or replace them with claims the "
+            "context supports, or fall back to generic discovery language. Do not introduce any new "
+            "unsupported fact."
+        )
     resp = client().chat.completions.parse(
         model=model,
         messages=[
             {"role": "system", "content": build_system(profile)},
-            {"role": "user", "content": f"Company: {company}\n\nContext:\n{context or '(no signals provided)'}"},
+            {"role": "user", "content": user},
         ],
         response_format=Brief,
         temperature=0.2,
