@@ -189,3 +189,15 @@ the payoff of building the eval first. Loop is crash-safe (returns AgentResult w
 safe_generate. Control flow verified in sandbox with mocked generate/critique (clean-first-try,
 revise-then-clean with feedback carried, budget-exhausted, graceful fail, deterministic CVE flag).
 Next: eval ablation comparing plain generation vs reflective on the 28-case golden set.
+
+## [2026-07] Phase 4 ablation: reflection did NOT beat a tuned prompt (in-distribution)
+Ran plain vs. reflective on the 28-case golden set, Claude judge. Result: no-hallucination
+1.0 vs 1.0, has_signal 1.0 vs 1.0, faithfulness 4.89 vs 4.86 (flat, within temp noise).
+0 hallucinations fixed — after Phase 3 prompt hardening there were none left. The agent
+revised 3 cases (cve-clear, vague-incident, phishing-news), all for SOFT over-reach the critic
+flags but the judge scores 5/5 anyway (e.g. "posing a significant risk of data breaches").
+Finding: the critic is stricter than the judge on inference; the reflection loop only pays off
+when the base generator actually slips, which it doesn't in-distribution. Decision: keep the
+agent as an available mode but DEFAULT to plain generation (cheaper, equal quality here).
+Reflection's value is latent for adversarial/out-of-distribution inputs. Next candidate: an
+adversarial eval slice to test that hypothesis rather than assume it.

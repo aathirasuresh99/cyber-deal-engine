@@ -1,0 +1,695 @@
+{
+  "summary": {
+    "cases_scored": 28,
+    "cases_errored": 0,
+    "plain": {
+      "n": 28,
+      "no_hallucination_rate": 1.0,
+      "has_signal_accuracy": 1.0,
+      "judge_faithfulness_avg": 4.89
+    },
+    "agent": {
+      "n": 28,
+      "no_hallucination_rate": 1.0,
+      "has_signal_accuracy": 1.0,
+      "judge_faithfulness_avg": 4.86
+    },
+    "cases_revised": 3,
+    "revised_ids": [
+      "cve-clear",
+      "vague-incident",
+      "phishing-news"
+    ],
+    "flips_to_clean": [],
+    "flips_to_dirty": []
+  },
+  "rows": [
+    {
+      "id": "breach-clear",
+      "category": "clear_breach",
+      "plain": {
+        "has_signal_correct": true,
+        "clean": true,
+        "faithfulness": 5
+      },
+      "agent": {
+        "has_signal_correct": true,
+        "clean": true,
+        "faithfulness": 5
+      },
+      "revisions": 0,
+      "agent_faithful_flag": true,
+      "critic_passes": [
+        {
+          "attempt": 0,
+          "faithful": true,
+          "flags": []
+        }
+      ]
+    },
+    {
+      "id": "cve-clear",
+      "category": "clear_cve",
+      "plain": {
+        "has_signal_correct": true,
+        "clean": true,
+        "faithfulness": 5
+      },
+      "agent": {
+        "has_signal_correct": true,
+        "clean": true,
+        "faithfulness": 5
+      },
+      "revisions": 1,
+      "agent_faithful_flag": true,
+      "critic_passes": [
+        {
+          "attempt": 0,
+          "faithful": false,
+          "flags": [
+            "The statement 'posing a significant risk of data breaches' is an unsupported assertion as the context does not explicitly mention data breaches, only the vulnerability itself."
+          ]
+        },
+        {
+          "attempt": 1,
+          "faithful": true,
+          "flags": []
+        }
+      ]
+    },
+    {
+      "id": "multi-signal",
+      "category": "multiple_signals",
+      "plain": {
+        "has_signal_correct": true,
+        "clean": true,
+        "faithfulness": 5
+      },
+      "agent": {
+        "has_signal_correct": true,
+        "clean": true,
+        "faithfulness": 5
+      },
+      "revisions": 0,
+      "agent_faithful_flag": true,
+      "critic_passes": [
+        {
+          "attempt": 0,
+          "faithful": true,
+          "flags": []
+        }
+      ]
+    },
+    {
+      "id": "no-signal-empty",
+      "category": "no_signal",
+      "plain": {
+        "has_signal_correct": true,
+        "clean": true,
+        "faithfulness": 5
+      },
+      "agent": {
+        "has_signal_correct": true,
+        "clean": true,
+        "faithfulness": 5
+      },
+      "revisions": 0,
+      "agent_faithful_flag": true,
+      "critic_passes": [
+        {
+          "attempt": 0,
+          "faithful": true,
+          "flags": []
+        }
+      ]
+    },
+    {
+      "id": "no-signal-marketing",
+      "category": "no_signal",
+      "plain": {
+        "has_signal_correct": true,
+        "clean": true,
+        "faithfulness": 5
+      },
+      "agent": {
+        "has_signal_correct": true,
+        "clean": true,
+        "faithfulness": 5
+      },
+      "revisions": 0,
+      "agent_faithful_flag": true,
+      "critic_passes": [
+        {
+          "attempt": 0,
+          "faithful": true,
+          "flags": []
+        }
+      ]
+    },
+    {
+      "id": "noisy-misattributed",
+      "category": "noise_resistance",
+      "plain": {
+        "has_signal_correct": true,
+        "clean": true,
+        "faithfulness": 5
+      },
+      "agent": {
+        "has_signal_correct": true,
+        "clean": true,
+        "faithfulness": 4
+      },
+      "revisions": 0,
+      "agent_faithful_flag": true,
+      "critic_passes": [
+        {
+          "attempt": 0,
+          "faithful": true,
+          "flags": []
+        }
+      ]
+    },
+    {
+      "id": "vague-incident",
+      "category": "hallucination_trap",
+      "plain": {
+        "has_signal_correct": true,
+        "clean": true,
+        "faithfulness": 5
+      },
+      "agent": {
+        "has_signal_correct": true,
+        "clean": true,
+        "faithfulness": 5
+      },
+      "revisions": 1,
+      "agent_faithful_flag": true,
+      "critic_passes": [
+        {
+          "attempt": 0,
+          "faithful": false,
+          "flags": [
+            "indicating a potential breach or exposure",
+            "raising concerns about the extent of the issue",
+            "the lack of transparency around the incident may lead to compliance scrutiny"
+          ]
+        },
+        {
+          "attempt": 1,
+          "faithful": true,
+          "flags": []
+        }
+      ]
+    },
+    {
+      "id": "stale-but-real-cve",
+      "category": "clear_cve",
+      "plain": {
+        "has_signal_correct": true,
+        "clean": true,
+        "faithfulness": 3
+      },
+      "agent": {
+        "has_signal_correct": true,
+        "clean": true,
+        "faithfulness": 4
+      },
+      "revisions": 0,
+      "agent_faithful_flag": true,
+      "critic_passes": [
+        {
+          "attempt": 0,
+          "faithful": true,
+          "flags": []
+        }
+      ]
+    },
+    {
+      "id": "phishing-news",
+      "category": "clear_breach",
+      "plain": {
+        "has_signal_correct": true,
+        "clean": true,
+        "faithfulness": 5
+      },
+      "agent": {
+        "has_signal_correct": true,
+        "clean": true,
+        "faithfulness": 5
+      },
+      "revisions": 1,
+      "agent_faithful_flag": true,
+      "critic_passes": [
+        {
+          "attempt": 0,
+          "faithful": false,
+          "flags": [
+            "This event highlights potential vulnerabilities in employee training and security awareness."
+          ]
+        },
+        {
+          "attempt": 1,
+          "faithful": true,
+          "flags": []
+        }
+      ]
+    },
+    {
+      "id": "product-launch-only",
+      "category": "no_signal",
+      "plain": {
+        "has_signal_correct": true,
+        "clean": true,
+        "faithfulness": 5
+      },
+      "agent": {
+        "has_signal_correct": true,
+        "clean": true,
+        "faithfulness": 5
+      },
+      "revisions": 0,
+      "agent_faithful_flag": true,
+      "critic_passes": [
+        {
+          "attempt": 0,
+          "faithful": true,
+          "flags": []
+        }
+      ]
+    },
+    {
+      "id": "vendor-breach",
+      "category": "third_party_breach",
+      "plain": {
+        "has_signal_correct": true,
+        "clean": true,
+        "faithfulness": 5
+      },
+      "agent": {
+        "has_signal_correct": true,
+        "clean": true,
+        "faithfulness": 5
+      },
+      "revisions": 0,
+      "agent_faithful_flag": true,
+      "critic_passes": [
+        {
+          "attempt": 0,
+          "faithful": true,
+          "flags": []
+        }
+      ]
+    },
+    {
+      "id": "cve-high-2",
+      "category": "clear_cve",
+      "plain": {
+        "has_signal_correct": true,
+        "clean": true,
+        "faithfulness": 5
+      },
+      "agent": {
+        "has_signal_correct": true,
+        "clean": true,
+        "faithfulness": 5
+      },
+      "revisions": 0,
+      "agent_faithful_flag": true,
+      "critic_passes": [
+        {
+          "attempt": 0,
+          "faithful": true,
+          "flags": []
+        }
+      ]
+    },
+    {
+      "id": "ransomware-2",
+      "category": "clear_breach",
+      "plain": {
+        "has_signal_correct": true,
+        "clean": true,
+        "faithfulness": 5
+      },
+      "agent": {
+        "has_signal_correct": true,
+        "clean": true,
+        "faithfulness": 5
+      },
+      "revisions": 0,
+      "agent_faithful_flag": true,
+      "critic_passes": [
+        {
+          "attempt": 0,
+          "faithful": true,
+          "flags": []
+        }
+      ]
+    },
+    {
+      "id": "no-signal-cert",
+      "category": "no_signal",
+      "plain": {
+        "has_signal_correct": true,
+        "clean": true,
+        "faithfulness": 5
+      },
+      "agent": {
+        "has_signal_correct": true,
+        "clean": true,
+        "faithfulness": 4
+      },
+      "revisions": 0,
+      "agent_faithful_flag": true,
+      "critic_passes": [
+        {
+          "attempt": 0,
+          "faithful": true,
+          "flags": []
+        }
+      ]
+    },
+    {
+      "id": "vague-activity",
+      "category": "hallucination_trap",
+      "plain": {
+        "has_signal_correct": true,
+        "clean": true,
+        "faithfulness": 5
+      },
+      "agent": {
+        "has_signal_correct": true,
+        "clean": true,
+        "faithfulness": 5
+      },
+      "revisions": 0,
+      "agent_faithful_flag": true,
+      "critic_passes": [
+        {
+          "attempt": 0,
+          "faithful": true,
+          "flags": []
+        }
+      ]
+    },
+    {
+      "id": "noise-funding",
+      "category": "noise_resistance",
+      "plain": {
+        "has_signal_correct": true,
+        "clean": true,
+        "faithfulness": 4
+      },
+      "agent": {
+        "has_signal_correct": true,
+        "clean": true,
+        "faithfulness": 5
+      },
+      "revisions": 0,
+      "agent_faithful_flag": true,
+      "critic_passes": [
+        {
+          "attempt": 0,
+          "faithful": true,
+          "flags": []
+        }
+      ]
+    },
+    {
+      "id": "multi-signal-2",
+      "category": "multiple_signals",
+      "plain": {
+        "has_signal_correct": true,
+        "clean": true,
+        "faithfulness": 5
+      },
+      "agent": {
+        "has_signal_correct": true,
+        "clean": true,
+        "faithfulness": 5
+      },
+      "revisions": 0,
+      "agent_faithful_flag": true,
+      "critic_passes": [
+        {
+          "attempt": 0,
+          "faithful": true,
+          "flags": []
+        }
+      ]
+    },
+    {
+      "id": "stale-breach",
+      "category": "clear_breach",
+      "plain": {
+        "has_signal_correct": true,
+        "clean": true,
+        "faithfulness": 5
+      },
+      "agent": {
+        "has_signal_correct": true,
+        "clean": true,
+        "faithfulness": 5
+      },
+      "revisions": 0,
+      "agent_faithful_flag": true,
+      "critic_passes": [
+        {
+          "attempt": 0,
+          "faithful": true,
+          "flags": []
+        }
+      ]
+    },
+    {
+      "id": "no-signal-exec",
+      "category": "no_signal",
+      "plain": {
+        "has_signal_correct": true,
+        "clean": true,
+        "faithfulness": 5
+      },
+      "agent": {
+        "has_signal_correct": true,
+        "clean": true,
+        "faithfulness": 5
+      },
+      "revisions": 0,
+      "agent_faithful_flag": true,
+      "critic_passes": [
+        {
+          "attempt": 0,
+          "faithful": true,
+          "flags": []
+        }
+      ]
+    },
+    {
+      "id": "insider-leak",
+      "category": "clear_breach",
+      "plain": {
+        "has_signal_correct": true,
+        "clean": true,
+        "faithfulness": 5
+      },
+      "agent": {
+        "has_signal_correct": true,
+        "clean": true,
+        "faithfulness": 5
+      },
+      "revisions": 0,
+      "agent_faithful_flag": true,
+      "critic_passes": [
+        {
+          "attempt": 0,
+          "faithful": true,
+          "flags": []
+        }
+      ]
+    },
+    {
+      "id": "misattributed-cve",
+      "category": "hallucination_trap",
+      "plain": {
+        "has_signal_correct": true,
+        "clean": true,
+        "faithfulness": 5
+      },
+      "agent": {
+        "has_signal_correct": true,
+        "clean": true,
+        "faithfulness": 5
+      },
+      "revisions": 0,
+      "agent_faithful_flag": true,
+      "critic_passes": [
+        {
+          "attempt": 0,
+          "faithful": true,
+          "flags": []
+        }
+      ]
+    },
+    {
+      "id": "regulator-fine",
+      "category": "clear_breach",
+      "plain": {
+        "has_signal_correct": true,
+        "clean": true,
+        "faithfulness": 5
+      },
+      "agent": {
+        "has_signal_correct": true,
+        "clean": true,
+        "faithfulness": 5
+      },
+      "revisions": 0,
+      "agent_faithful_flag": true,
+      "critic_passes": [
+        {
+          "attempt": 0,
+          "faithful": true,
+          "flags": []
+        }
+      ]
+    },
+    {
+      "id": "no-signal-whitespace",
+      "category": "no_signal",
+      "plain": {
+        "has_signal_correct": true,
+        "clean": true,
+        "faithfulness": 5
+      },
+      "agent": {
+        "has_signal_correct": true,
+        "clean": true,
+        "faithfulness": 5
+      },
+      "revisions": 0,
+      "agent_faithful_flag": true,
+      "critic_passes": [
+        {
+          "attempt": 0,
+          "faithful": true,
+          "flags": []
+        }
+      ]
+    },
+    {
+      "id": "cve-medium",
+      "category": "clear_cve",
+      "plain": {
+        "has_signal_correct": true,
+        "clean": true,
+        "faithfulness": 5
+      },
+      "agent": {
+        "has_signal_correct": true,
+        "clean": true,
+        "faithfulness": 5
+      },
+      "revisions": 0,
+      "agent_faithful_flag": true,
+      "critic_passes": [
+        {
+          "attempt": 0,
+          "faithful": true,
+          "flags": []
+        }
+      ]
+    },
+    {
+      "id": "supply-chain",
+      "category": "clear_cve",
+      "plain": {
+        "has_signal_correct": true,
+        "clean": true,
+        "faithfulness": 5
+      },
+      "agent": {
+        "has_signal_correct": true,
+        "clean": true,
+        "faithfulness": 4
+      },
+      "revisions": 0,
+      "agent_faithful_flag": true,
+      "critic_passes": [
+        {
+          "attempt": 0,
+          "faithful": true,
+          "flags": []
+        }
+      ]
+    },
+    {
+      "id": "phishing-2",
+      "category": "clear_breach",
+      "plain": {
+        "has_signal_correct": true,
+        "clean": true,
+        "faithfulness": 5
+      },
+      "agent": {
+        "has_signal_correct": true,
+        "clean": true,
+        "faithfulness": 5
+      },
+      "revisions": 0,
+      "agent_faithful_flag": true,
+      "critic_passes": [
+        {
+          "attempt": 0,
+          "faithful": true,
+          "flags": []
+        }
+      ]
+    },
+    {
+      "id": "no-signal-acquisition",
+      "category": "no_signal",
+      "plain": {
+        "has_signal_correct": true,
+        "clean": true,
+        "faithfulness": 5
+      },
+      "agent": {
+        "has_signal_correct": true,
+        "clean": true,
+        "faithfulness": 5
+      },
+      "revisions": 0,
+      "agent_faithful_flag": true,
+      "critic_passes": [
+        {
+          "attempt": 0,
+          "faithful": true,
+          "flags": []
+        }
+      ]
+    },
+    {
+      "id": "ddos-incident",
+      "category": "clear_breach",
+      "plain": {
+        "has_signal_correct": true,
+        "clean": true,
+        "faithfulness": 5
+      },
+      "agent": {
+        "has_signal_correct": true,
+        "clean": true,
+        "faithfulness": 5
+      },
+      "revisions": 0,
+      "agent_faithful_flag": true,
+      "critic_passes": [
+        {
+          "attempt": 0,
+          "faithful": true,
+          "flags": []
+        }
+      ]
+    }
+  ]
+}
