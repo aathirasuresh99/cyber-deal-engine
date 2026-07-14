@@ -76,10 +76,11 @@ def _judge_anthropic(context: str, brief_text: str, model: str) -> JudgeVerdict:
         "description": "Record the evaluation verdict for the brief.",
         "input_schema": JudgeVerdict.model_json_schema(),
     }
+    # Note: newer Claude models reject the `temperature` param (deterministic by default), so we
+    # don't set it here. Forcing the tool call already makes the output structure deterministic.
     resp = anthropic_client().messages.create(
         model=model,
         max_tokens=1024,
-        temperature=0.0,
         system=_JUDGE_SYSTEM,
         tools=[tool],
         tool_choice={"type": "tool", "name": "record_verdict"},
