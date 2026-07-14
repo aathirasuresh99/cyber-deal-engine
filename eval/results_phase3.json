@@ -1,0 +1,212 @@
+{
+  "summary": {
+    "cases_total": 10,
+    "cases_scored": 10,
+    "cases_errored": 0,
+    "no_hallucination_rate": 1.0,
+    "has_signal_accuracy": 1.0,
+    "judge_faithfulness_avg": 5.0
+  },
+  "rows": [
+    {
+      "id": "breach-clear",
+      "category": "clear_breach",
+      "company": "NimbusPay",
+      "expect_has_signal": true,
+      "got_has_signal": true,
+      "checks": {
+        "has_signal_correct": true,
+        "no_forbidden": true,
+        "no_fabricated_cve": true
+      },
+      "clean": true,
+      "judge": {
+        "faithfulness": 5,
+        "relevance": 5,
+        "actionability": 5,
+        "unsupported_claims": [],
+        "rationale": "The brief accurately reflects the context provided, mentioning the ransomware attack on NimbusPay, the exfiltration of 1.2 million customer records, and the encryption of internal systems. It also appropriately raises compliance concerns, which are relevant to the incident described. All claims are supported by the context, making the brief fully faithful."
+      }
+    },
+    {
+      "id": "cve-clear",
+      "category": "clear_cve",
+      "company": "HydraCRM",
+      "expect_has_signal": true,
+      "got_has_signal": true,
+      "checks": {
+        "has_signal_correct": true,
+        "no_forbidden": true,
+        "no_fabricated_cve": true
+      },
+      "clean": true,
+      "judge": {
+        "faithfulness": 5,
+        "relevance": 5,
+        "actionability": 5,
+        "unsupported_claims": [],
+        "rationale": "The brief accurately reflects the context provided, detailing the CVE-2025-40881 vulnerability in HydraCRM Server, including its CVSS score and affected versions. It also appropriately discusses the implications for data protection compliance, which is a valid generic angle. All claims are supported by the context."
+      }
+    },
+    {
+      "id": "multi-signal",
+      "category": "multiple_signals",
+      "company": "OrbitLedger",
+      "expect_has_signal": true,
+      "got_has_signal": true,
+      "checks": {
+        "has_signal_correct": true,
+        "no_forbidden": true,
+        "no_fabricated_cve": true
+      },
+      "clean": true,
+      "judge": {
+        "faithfulness": 5,
+        "relevance": 5,
+        "actionability": 5,
+        "unsupported_claims": [],
+        "rationale": "The brief accurately reflects the context provided, mentioning the credential-stuffing incident and the CVE-2026-11902 with its details. It also appropriately discusses compliance in a generic manner, which is acceptable. All claims are supported by the context, making the brief fully faithful."
+      }
+    },
+    {
+      "id": "no-signal-empty",
+      "category": "no_signal",
+      "company": "BlankSoft",
+      "expect_has_signal": false,
+      "got_has_signal": false,
+      "checks": {
+        "has_signal_correct": true,
+        "no_forbidden": true,
+        "no_fabricated_cve": true
+      },
+      "clean": true,
+      "judge": {
+        "faithfulness": 5,
+        "relevance": 5,
+        "actionability": 5,
+        "unsupported_claims": [],
+        "rationale": "The brief does not assert any specific facts or incidents that are not supported by the context. It focuses on generic discovery angles and compliance topics, which are appropriate given the empty context."
+      }
+    },
+    {
+      "id": "no-signal-marketing",
+      "category": "no_signal",
+      "company": "MarketBloom",
+      "expect_has_signal": false,
+      "got_has_signal": false,
+      "checks": {
+        "has_signal_correct": true,
+        "no_forbidden": true,
+        "no_fabricated_cve": true
+      },
+      "clean": true,
+      "judge": {
+        "faithfulness": 5,
+        "relevance": 5,
+        "actionability": 5,
+        "unsupported_claims": [],
+        "rationale": "The brief remains faithful to the context by focusing on MarketBloom's expansion to Pune and discussing general cybersecurity and compliance strategies without making unsupported claims. It appropriately references the DPDP Act and CERT-In guidelines, which are relevant to the Indian context, without asserting any specific incidents or breaches."
+      }
+    },
+    {
+      "id": "noisy-misattributed",
+      "category": "noise_resistance",
+      "company": "PineVault",
+      "expect_has_signal": true,
+      "got_has_signal": true,
+      "checks": {
+        "has_signal_correct": true,
+        "no_forbidden": true,
+        "no_fabricated_cve": true
+      },
+      "clean": true,
+      "judge": {
+        "faithfulness": 5,
+        "relevance": 5,
+        "actionability": 5,
+        "unsupported_claims": [],
+        "rationale": "The brief accurately reflects the context provided, specifically mentioning the CVE-2026-20551 vulnerability in PineVault's Backup Agent and its CVSS score. It also appropriately discusses compliance with CERT-In and the DPDP Act, which are generic compliance angles relevant to the context. No unsupported claims are present."
+      }
+    },
+    {
+      "id": "vague-incident",
+      "category": "hallucination_trap",
+      "company": "TideBank",
+      "expect_has_signal": true,
+      "got_has_signal": true,
+      "checks": {
+        "has_signal_correct": true,
+        "no_forbidden": true,
+        "no_fabricated_cve": true
+      },
+      "clean": true,
+      "judge": {
+        "faithfulness": 5,
+        "relevance": 5,
+        "actionability": 5,
+        "unsupported_claims": [],
+        "rationale": "The brief accurately reflects the context by mentioning the 'security incident' communicated by TideBank without adding any unsupported details. It appropriately discusses the lack of transparency and suggests compliance with RBI and CERT-In, which are generic and relevant angles. All claims are supported by the context provided."
+      }
+    },
+    {
+      "id": "stale-but-real-cve",
+      "category": "clear_cve",
+      "company": "Fernshop",
+      "expect_has_signal": true,
+      "got_has_signal": true,
+      "checks": {
+        "has_signal_correct": true,
+        "no_forbidden": true,
+        "no_fabricated_cve": true
+      },
+      "clean": true,
+      "judge": {
+        "faithfulness": 5,
+        "relevance": 5,
+        "actionability": 5,
+        "unsupported_claims": [],
+        "rationale": "The brief accurately reflects the context provided, mentioning the CVE-2022-30190 vulnerability, its CVSS score, and its status in end-of-life versions. It also appropriately discusses compliance angles without introducing unsupported claims."
+      }
+    },
+    {
+      "id": "phishing-news",
+      "category": "clear_breach",
+      "company": "CedarHR",
+      "expect_has_signal": true,
+      "got_has_signal": true,
+      "checks": {
+        "has_signal_correct": true,
+        "no_forbidden": true,
+        "no_fabricated_cve": true
+      },
+      "clean": true,
+      "judge": {
+        "faithfulness": 5,
+        "relevance": 5,
+        "actionability": 5,
+        "unsupported_claims": [],
+        "rationale": "The brief accurately reflects the context provided, mentioning the phishing campaign, compromised credentials, and the password reset. It also appropriately discusses the importance of compliance and response, which are relevant to the incident described. No unsupported claims are present."
+      }
+    },
+    {
+      "id": "product-launch-only",
+      "category": "no_signal",
+      "company": "GlideDocs",
+      "expect_has_signal": false,
+      "got_has_signal": false,
+      "checks": {
+        "has_signal_correct": true,
+        "no_forbidden": true,
+        "no_fabricated_cve": true
+      },
+      "clean": true,
+      "judge": {
+        "faithfulness": 5,
+        "relevance": 5,
+        "actionability": 5,
+        "unsupported_claims": [],
+        "rationale": "The brief does not make any unsupported claims about specific security incidents or breaches. It focuses on general compliance and cybersecurity strategies, which are relevant and actionable for a company like GlideDocs that is expanding its AI capabilities. The brief aligns well with the context provided."
+      }
+    }
+  ]
+}
