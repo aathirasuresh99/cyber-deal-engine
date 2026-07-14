@@ -22,6 +22,9 @@ class Brief(BaseModel):
         description="Exactly 3 likely buyer objections, framed as questions the rep should be ready for",
     )
     has_signal: bool = Field(
-        ..., description="True only if the context contained real, relevant signals. "
-                         "If False, the brief must not assert any specific breach or fact.",
+        ..., description="True only if the context contains an actionable security WEAKNESS "
+                         "(breach, incident, disclosed CVE/vulnerability, or regulatory fine). "
+                         "Positive posture (certifications, awards) and general business news "
+                         "(funding, launches, hires) are NOT signals -> False. If False, the brief "
+                         "must not assert any specific breach or fact.",
     )

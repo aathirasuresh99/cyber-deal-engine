@@ -136,3 +136,23 @@ Format: `## [YYYY-MM-DD] Decision title` → **Decision**, **Context**, **Altern
 **Why it matters:** Distinguishing a mis-specified test from a genuine model regression is the core discipline of running an eval. Relaxing a check to hide a real failure would be gaming the metric; relaxing a check that measures the wrong thing is correcting the instrument. The difference is documented here on purpose.
 
 **Revisit if:** the persisted brief text shows misattributed-cve is dismissing the CVE correctly (then it's a false positive too, and the guard needs to distinguish "cites to dismiss" from "asserts as fact").
+
+---
+
+## [2026-07] Define "signal" precisely — weaknesses only, not posture
+**Decision:** A "signal" is an actionable security WEAKNESS/exposure (breach, incident, disclosed CVE/vulnerability, regulatory fine). Positive security-posture news (ISO 27001 / SOC 2 certifications, security awards) and general business news (funding, launches, hires, acquisitions) are explicitly NOT signals. Encoded in both the schema (has_signal description) and the generator prompt.
+
+**Context:** The expanded eval flagged a has_signal mismatch on no-signal-cert (SafeHarbor "achieved ISO 27001"): the model called it has_signal=true, the golden label said false. Root cause was our own ambiguous definition ("real, relevant signals") — a cert is real and security-relevant, so the model wasn't clearly wrong.
+
+**Why weaknesses only:** The product hands a rep an opening. A breach/CVE/fine is an opening; a certification is the opposite (the prospect is already investing, harder to sell). Counting posture/business news as signal would flood the pipeline with false positives and erode the no-hallucination/precision north star, and produce briefs with no hook.
+
+**Revisit if:** a market wants "any security-relevant event" (e.g. competitive-intel use cases) — then has_signal could become a multi-class label (weakness / posture / none) rather than a boolean.
+
+## [2026-07] misattributed-cve — moved from deterministic guard to judge
+**Decision:** Removed the forbidden-substring guard (["Larkspur", the CVE id]) from the misattributed-cve case; the test now rests on has_signal_correct (must be false) plus the LLM judge.
+
+**Context:** With the brief text persisted, we could see the model handled the trap correctly: it set has_signal=false and explicitly stated the CVE belongs to "a separate company, Larkspur Analytics." The no_forbidden check fired only because it's a blind substring match — it can't tell "cites Larkspur to dismiss it" (correct) from "asserts Larkspur's CVE as the prospect's" (misattribution).
+
+**Why:** Misattribution is a semantic judgment, not a string presence. Forcing it into a deterministic check produced a false positive on correct behavior. Coverage is retained: true misattribution would flip has_signal to true (caught by has_signal_correct) and tank faithfulness (caught by the judge).
+
+**Note (soft, not fixed):** the model did spin a mild "third-party integration risk" angle off the unrelated CVE. The judge rated it faithful (it was clearly hedged), but a future judge-prompt refinement could penalize manufacturing a hook from an unrelated company's issue.
