@@ -19,11 +19,16 @@ Writes eval/agent_comparison.json. Costs credits: ~28 cases, plain = 1 call each
 (1 + max_revisions) generations + a critique per pass. Judge adds one call per brief per arm.
 
 Run (needs OPENAI_API_KEY; set JUDGE_MODEL=claude-sonnet-5 for the independent grader):
-    python -m eval.compare_agent
+    python -m eval.compare_agent                          # in-distribution golden set
+    python -m eval.compare_agent golden_adversarial.jsonl # adversarial slice
+
+Pass a golden filename as the first argument to run on a different set. Output is written to
+agent_comparison_<stem>.json so the two runs don't overwrite each other.
 """
 from __future__ import annotations
 
 import json
+import sys
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -35,14 +40,26 @@ from src.agent import generate_brief_reflective  # noqa: E402
 from eval import checks as C  # noqa: E402
 from eval.judge import judge_brief  # noqa: E402
 
-GOLDEN = Path(__file__).resolve().parent / "golden.jsonl"
-OUT = Path(__file__).resolve().parent / "agent_comparison.json"
-
+HERE = Path(__file__).resolve().parent
 MAX_REVISIONS = 2
 
 
-def load_cases() -> list[dict]:
-    with open(GOLDEN, encoding="utf-8") as f:
+def _golden_path() -> Path:
+    """First CLI arg (a filename or path) selects the set; default is the main golden set."""
+    if len(sys.argv) > 1:
+        p = Path(sys.argv[1])
+        return p if p.is_absolute() else HERE / p.name
+    return HERE / "golden.jsonl"
+
+
+def _out_path(golden: Path) -> Path:
+    stem = golden.stem  # 'golden' or 'golden_adversarial'
+    suffix = "" if stem == "golden" else f"_{stem}"
+    return HERE / f"agent_comparison{suffix}.json"
+
+
+def load_cases(golden: Path) -> list[dict]:
+    with open(golden, encoding="utf-8") as f:
         return [json.loads(line) for line in f if line.strip()]
 
 
@@ -71,8 +88,8 @@ def _aggregate(scores: list[dict]) -> dict:
     }
 
 
-def evaluate() -> dict:
-    cases = load_cases()
+def evaluate(golden: Path) -> dict:
+    cases = load_cases(golden)
     rows = []
     for case in cases:
         # --- plain arm ---
@@ -125,11 +142,13 @@ def evaluate() -> dict:
 
 
 def main() -> None:
-    report = evaluate()
-    OUT.write_text(json.dumps(report, indent=2))
+    golden = _golden_path()
+    out = _out_path(golden)
+    report = evaluate(golden)
+    out.write_text(json.dumps(report, indent=2))
     s = report["summary"]
     p, a = s["plain"], s["agent"]
-    print("\n=== Plain vs. Reflective agent ===")
+    print(f"\n=== Plain vs. Reflective agent ({golden.name}) ===")
     print(f"cases scored:            {s['cases_scored']}"
           + (f"  ({s['cases_errored']} errored)" if s["cases_errored"] else ""))
     print(f"{'metric':<26}{'plain':>8}{'agent':>8}")
@@ -140,7 +159,7 @@ def main() -> None:
     print(f"fixed by reflection:     {len(s['flips_to_clean'])}  {s['flips_to_clean']}   <- payoff")
     if s["flips_to_dirty"]:
         print(f"REGRESSIONS:             {s['flips_to_dirty']}   <- investigate")
-    print(f"\nFull results written to {OUT.name}")
+    print(f"\nFull results written to {out.name}")
 
 
 if __name__ == "__main__":

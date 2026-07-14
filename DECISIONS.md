@@ -201,3 +201,20 @@ when the base generator actually slips, which it doesn't in-distribution. Decisi
 agent as an available mode but DEFAULT to plain generation (cheaper, equal quality here).
 Reflection's value is latent for adversarial/out-of-distribution inputs. Next candidate: an
 adversarial eval slice to test that hypothesis rather than assume it.
+
+## [2026-07] Aligned critic and judge on "risk-framing vs asserted-fact"
+The Phase 4 ablation surfaced a disagreement: the runtime critic flagged soft phrases like
+"a disclosed SQL-injection CVE puts customer data at risk" as unsupported, but the judge scored
+those briefs 5/5. Decided the judge was right — stating the RISK a disclosed weakness implies is
+reasonable interpretation, not fabrication. Updated both _CRITIC_SYSTEM (src/critic.py) and
+_JUDGE_SYSTEM (eval/judge.py) to share one boundary: risk framing is allowed; asserting an event
+HAPPENED (breach/exfiltration) when only a vulnerability was disclosed, inventing a fact/number/
+date/CVE, or misattributing another company's event, is unsupported. This stops the agent from
+making pointless "faithful->faithful" rewrites in-distribution.
+
+## [2026-07] Adversarial eval slice (test reflection's latent value)
+Added eval/golden_adversarial.jsonl (10 cases): multi-company roundups, similar-name traps,
+signal buried in funding noise, low-severity-CVE exaggeration bait, competitor breach beside the
+prospect's own CVE, rumor/number bait. compare_agent.py now takes a golden filename arg and
+writes agent_comparison_<stem>.json. Hypothesis under test: reflection's "fixed by reflection"
+count should rise on this slice if its value is real where the prompt is untuned. Run pending.

@@ -41,7 +41,12 @@ _JUDGE_SYSTEM = (
     "brief was allowed to use and the BRIEF that was produced. Judge the brief ONLY against the "
     "context. A brief must never assert breaches, CVEs, dates, or numbers that are not in the "
     "context. Note: a generic compliance angle (e.g. DPDP, RBI) is acceptable background and is "
-    "NOT an unsupported claim, but a specific fabricated incident IS. If the context is empty, a "
+    "NOT an unsupported claim, but a specific fabricated incident IS. "
+    "RISK FRAMING IS ALLOWED: stating the security RISK a disclosed weakness implies (e.g. an "
+    "unauthenticated SQL-injection CVE 'puts customer data at risk') is reasonable interpretation, "
+    "NOT an unsupported claim. What is unsupported is asserting an event HAPPENED when the context "
+    "does not say so (e.g. claiming data WAS breached when only a vulnerability was disclosed). "
+    "If the context is empty, a "
     "faithful brief offers only generic discovery angles and asserts no specific facts."
 )
 

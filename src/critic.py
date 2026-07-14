@@ -62,8 +62,15 @@ _CRITIC_SYSTEM = (
     "brief was allowed to use and the BRIEF that was produced. Judge the brief ONLY against the "
     "context. Flag any statement that asserts a breach, CVE, date, number, or incident not present "
     "in the context, and any security event that actually belongs to a DIFFERENT company than the "
-    "prospect. A generic compliance angle (e.g. DPDP, RBI) stated as background is acceptable and is "
-    "NOT unsupported. If the context is empty, only fully generic discovery language is faithful; any "
+    "prospect. "
+    "RISK FRAMING IS ALLOWED: stating the security RISK that a disclosed weakness implies (e.g. an "
+    "unauthenticated SQL-injection CVE 'puts customer data at risk', a disclosed vulnerability 'could "
+    "be exploited') is reasonable interpretation of the context, NOT an unsupported claim. What is "
+    "unsupported is asserting that an event HAPPENED when the context does not say so — e.g. claiming "
+    "data WAS breached or exfiltrated when only a vulnerability was disclosed, or stating a number, "
+    "date, or CVE id the context never contained. "
+    "A generic compliance angle (e.g. DPDP, RBI) stated as background is acceptable and is NOT "
+    "unsupported. If the context is empty, only fully generic discovery language is faithful; any "
     "specific asserted fact is unsupported."
 )
 

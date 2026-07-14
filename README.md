@@ -4,10 +4,11 @@ Turns cybersecurity signals into pre-meeting sales briefs for cybersecurity sale
 Given a prospect company, it produces 3 key points (breach/vulnerability first), a meeting
 opener, and 3 objection questions — grounded in real signals, never fabricated.
 
-> Status: **signal pipeline + evaluation harness working.** Ingests real CVE (NVD) and news
-> (NewsAPI) signals, stores and retrieves them per company, generates a structured brief, and
-> scores brief quality with an automated eval harness (deterministic guardrails + LLM-as-judge).
-> Agents and richer retrieval come next (see `Cyber-Deal-Engine-Build-Guide.md`).
+> Status: **signal pipeline + evaluation harness + reflection agent working.** Ingests real CVE
+> (NVD) and news (NewsAPI) signals, stores and retrieves them per company, generates a structured
+> brief, scores quality with an automated eval harness (deterministic guardrails + LLM-as-judge),
+> and can self-critique and revise its own drafts against that same faithfulness standard. Richer
+> retrieval (embeddings/reranking) comes next (see `Cyber-Deal-Engine-Build-Guide.md`).
 
 ## Quick start
 
@@ -36,6 +37,8 @@ src/
   llm.py       # model wrapper (OpenAI generate + lazy Anthropic judge client)
   schema.py    # Brief output contract (Pydantic)
   brief.py     # structured generation + hallucination guardrail
+  critic.py    # runtime faithfulness critic (same standard the eval judges)
+  agent.py     # reflection agent: draft -> critique -> revise
   store.py     # SQLAlchemy signal storage (dedup by url)
   retrieve.py  # per-company retrieval + noise filtering
   config.py    # geo-agnostic market profile
@@ -44,11 +47,13 @@ ingest/
   news.py      # news ingester (NewsAPI)
   run_ingest.py# watchlist runner over data/target_companies.csv
 eval/
-  golden.jsonl        # hand-built golden dataset (fictional companies)
-  checks.py           # deterministic guardrails (no fabricated CVE / forbidden facts)
-  judge.py            # LLM-as-judge (OpenAI or Claude, provider-selectable)
-  run_eval.py         # main harness -> results.json
-  compare_models.py   # multi-model, multi-pass cost vs. quality comparison
+  golden.jsonl             # hand-built golden dataset (fictional companies)
+  golden_adversarial.jsonl # harder slice: multi-company noise, similar names, buried signals
+  checks.py                # deterministic guardrails (no fabricated CVE / forbidden facts)
+  judge.py                 # LLM-as-judge (OpenAI or Claude, provider-selectable)
+  run_eval.py              # main harness -> results.json
+  compare_models.py        # multi-model, multi-pass cost vs. quality comparison
+  compare_agent.py         # plain vs. reflection-agent ablation
 app.py         # Streamlit demo (watchlist + paste-your-own tabs)
 data/          # target_companies.csv (your sandbox watchlist)
 ```
@@ -98,6 +103,59 @@ for run-to-run noise:
 `gpt-4o-mini` matches the guardrails, is at least as faithful (and more stable across passes),
 and costs ~17× less — so it's the production default. The variance columns matter: a single pass
 had gpt-4o scoring anywhere from 4.4 to 5.0, which is why the decision rests on multi-pass numbers.
+
+## The reflection agent — and when it actually helps
+
+Phase 4 turns the generator into an agent that checks its own work. Instead of one call
+(context in, brief out, hope it's faithful), it runs a bounded loop:
+
+```
+draft ─► critique ─► unfaithful? ─► revise with the critique ─► critique ─► ...
+                └─ faithful ─► done
+```
+
+The critic (`src/critic.py`) applies the *same* definition of "faithful" the eval judge uses, so
+the agent is held at runtime to exactly the standard the eval measures offline. Building the eval
+first is what made this possible — the offline judge and the runtime safety net share one rule.
+
+```bash
+python -m src.agent                                   # trace one brief through the loop
+python -m eval.compare_agent                          # plain vs. agent, in-distribution
+python -m eval.compare_agent golden_adversarial.jsonl # plain vs. agent, adversarial slice
+```
+
+### In-distribution: reflection did *not* beat a tuned prompt
+
+Ablation on the 28-case golden set (Claude judge), plain single pass vs. the agent:
+
+| metric | plain | agent |
+|---|---|---|
+| no-hallucination rate | 1.0 | 1.0 |
+| has_signal accuracy | 1.0 | 1.0 |
+| judge faithfulness avg | 4.89 | 4.86 |
+| hallucinations fixed by reflection | — | **0** |
+
+The honest result: **no measurable gain.** After the Phase 3 prompt hardening there were no
+hallucinations left to fix, so paying ~2× the calls bought nothing here. The agent revised 3
+cases, but all 3 were the critic over-firing on legitimate *risk framing* ("a disclosed
+SQL-injection CVE puts customer data at risk") that the judge — correctly — accepted. That
+disagreement was itself a finding: the critic and judge didn't share a boundary. Both were
+updated to agree — stating the *risk* a disclosed weakness implies is allowed; asserting an event
+*happened* (or inventing a fact/CVE, or misattributing another company's event) is not.
+
+The takeaway is the point: **a reflection loop only earns its cost when the base generator
+actually slips.** Knowing when *not* to add complexity is a result worth reporting.
+
+### Adversarial: does it help where the prompt is untuned?
+
+To test whether reflection has *latent* value, `eval/golden_adversarial.jsonl` holds 10 harder
+cases the tuned prompt is more likely to miss: multi-company news roundups, similar-name traps
+(`Halcyon Bank` vs `Halcyon Logistics`), a real breach buried among unrelated funding numbers,
+low-severity CVEs that tempt exaggeration, and a competitor's breach sitting next to the
+prospect's own CVE. Run `python -m eval.compare_agent golden_adversarial.jsonl` to measure
+whether the loop's `fixed by reflection` count rises where the single pass falls short.
+
+_(Adversarial numbers to be filled in from that run.)_
 
 ## Design decisions
 See `DECISIONS.md` for scope choices and *why* (target market, coverage model, sources, hero insight).
