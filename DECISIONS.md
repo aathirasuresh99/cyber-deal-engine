@@ -119,3 +119,20 @@ Format: `## [YYYY-MM-DD] Decision title` → **Decision**, **Context**, **Altern
 **Nuance / what I learned:** Single-pass faithfulness is noisy (gpt-4o scored 4.6 and 5.0 on different passes at temperature 0.2). So the comparison harness now runs 3 passes/model and reports mean ± stdev; the model decision rests on the stable guardrail metrics plus a faithfulness range, not one lucky draw.
 
 **Revisit if:** faithfulness stdev turns out large once multi-pass numbers are in, a harder/expanded golden set exposes a quality gap, or a cheaper/stronger model ships. The judge should also move to a different provider (Anthropic) to remove same-family grading bias.
+
+---
+
+## [2026-07] Eval hardening — test bugs vs. model failures
+**Decision:** When the expanded golden set (28 cases) produced two no_forbidden failures, treat them by root cause rather than blindly "fixing the model": corrected the over-strict forbidden lists (test bug) and kept the legitimate guard, and made the harness persist each brief's text so failures are debuggable.
+
+**Context:** no-signal-acquisition and misattributed-cve failed the deterministic no_forbidden check, yet both had has_signal_correct=true, judge faithfulness=5, and zero unsupported claims — the judge considered them perfect.
+
+**Diagnosis:**
+- Benign no-signal cases (acquisition, ISO cert, exec hire, empty) forbade generic security *words* ("breach", "ransomware", "vulnerability"). But a generic discovery question ("how would you respond to a breach?") is faithful no-signal behavior by our own judge's definition. The test was punishing correct output -> forbidden lists now contain only specific fabricated facts (other-company names, specific numbers, specific CVE ids), never generic vocabulary. The no_fabricated_cve guard already catches invented CVE ids independently.
+- misattributed-cve (a CVE belonging to a different company, "Larkspur", vs prospect "Larkfield") kept its strict forbidden list — surfacing an unrelated company's CVE is a real risk, not generic vocabulary.
+
+**Also:** run_eval.py now stores the generated brief (key_points/opener/objection_questions) in results.json, so a failing case can be inspected without a re-run.
+
+**Why it matters:** Distinguishing a mis-specified test from a genuine model regression is the core discipline of running an eval. Relaxing a check to hide a real failure would be gaming the metric; relaxing a check that measures the wrong thing is correcting the instrument. The difference is documented here on purpose.
+
+**Revisit if:** the persisted brief text shows misattributed-cve is dismissing the CVE correctly (then it's a false positive too, and the guard needs to distinguish "cites to dismiss" from "asserts as fact").

@@ -58,6 +58,12 @@ def evaluate() -> dict:
             "checks": chk,
             "clean": C.is_clean(chk),
             "judge": verdict,
+            # Persist the actual brief so any failure is debuggable without re-running.
+            "brief": {
+                "key_points": brief.key_points,
+                "opener": brief.opener,
+                "objection_questions": brief.objection_questions,
+            },
         })
 
     scored = [r for r in rows if "checks" in r]
