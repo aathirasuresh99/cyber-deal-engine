@@ -351,6 +351,31 @@ still fires.
 > 1.0, faithfulness ~4.9) **do not automatically carry over** and must not be quoted as current.
 > Re-labelling + a fresh eval run is the immediate next task before any new quality claim.
 
+### Golden set re-labelled (done; live re-run pending)
+Re-labelled `eval/golden.jsonl` against the taxonomy. Three business-event cases flipped
+`false → true` because they are now real triggers: `no-signal-marketing` (new office + hiring →
+growth), `product-launch-only` (Series B → fundraising), `no-signal-acquisition` (definitive
+acquisition → M&A). Five positive cases were **added** to exercise triggers the old set never
+covered: cloud migration (growth), enterprise SOC 2 demand (customer_security_demand), DPDP
+deadline (compliance), cyber-insurance renewal (insurer/board), and a same-segment peer breach
+(peer_or_industry_breach). Result: **33 cases, 28 signal / 5 no-signal.**
+
+**Deliberately kept `false`** to preserve honest negatives and the misattribution tests:
+`no-signal-cert` (posture — ISO/SOC2 *achieved* is not a trigger), `no-signal-exec` (an executive
+appointment / expansion *intent* with no disclosed operational change — the line is *concrete
+surface change* vs *intent*), `misattributed-cve` (a different, unaffiliated company's CVE), and the
+empty/whitespace cases. The **adversarial slice was left unchanged**: its multi-company/roundup
+cases test that the model does *not* pull an unrelated company's breach in as the prospect's own; the
+new `peer-breach` positive is distinct because it names a *genuine same-segment competitor*. The
+deterministic forbidden-string check can't tell "cited as the peer's breach" from "claimed as our
+own," so peer-framing faithfulness is judged semantically (LLM judge), not by a forbidden list —
+which is why the `peer-breach` case carries an empty `forbidden` and relies on the judge.
+
+Also extended the deterministic guard (`eval/checks.py`) and the critic/judge text to scan the new
+brief fields (`why_now`, `stakeholders`, `discovery_questions`), so a fabricated CVE or forbidden
+fact hidden in any field is now caught. **Numbers still need a live `python -m eval.run_eval` to
+refresh** — code and data are ready; the run needs API keys and is the user's to execute.
+
 ## [2026-07] Real-time: on-demand live fetch + scheduled refresh (both)
 **Decision:** Added `src/live.py` — an on-demand path that queries NVD + NewsAPI *live* for any
 company at request time, runs the same precision-filter/rerank as the stored path, and briefs with

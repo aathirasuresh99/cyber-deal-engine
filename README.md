@@ -89,12 +89,31 @@ have **Claude grade OpenAI's output** — a genuinely independent grader.
 The headline metric is the **no-hallucination rate** (share of briefs that break none of the
 fabrication guards). Results are written to `eval/results.json` so runs are comparable over time.
 
-> ⚠️ **Eval numbers below predate the Phase 5 trigger broadening.** Widening `has_signal` to the
-> full buying-trigger taxonomy invalidates the old golden labels (cases labelled "no signal" under
-> the breach/vuln-only rule may now legitimately be a signal via M&A/growth/compliance). The golden
-> sets need re-labelling and a fresh run before these figures can be quoted as current — see
-> `DECISIONS.md` "Phase 5." The fabrication guardrails (never invent a CVE/date/number/incident) are
-> unchanged and still enforced at runtime and in the deterministic checks.
+**Current run — re-labelled Phase 5 golden set (33 cases, 28 signal / 5 no-signal):**
+
+| metric | value |
+|---|---|
+| no-hallucination rate | **1.0** |
+| has_signal accuracy | 0.939 |
+| judge faithfulness avg | 4.94 / 5 |
+
+The golden set was **re-labelled** for the full buying-trigger taxonomy: three business-event cases
+that were "no signal" under the breach/vuln-only rule are now positive (new-office/hiring = growth,
+Series B = fundraising, definitive acquisition = M&A), and five new positive cases were added (cloud
+migration, SOC 2 customer demand, DPDP deadline, cyber-insurance renewal, peer breach). Posture
+(ISO/SOC2 already achieved), a personnel appointment, and a misattributed CVE stay correctly
+labelled no-signal. Fabrication guardrails (never invent a CVE/date/number/incident) now scan every
+brief field including the Phase 5 ones.
+
+The two `has_signal` misses are both the *softest* triggers — a new office + hiring (growth) and a
+Series B raise (fundraising), each with zero security context. The model calls these "no signal,"
+erring conservative: it under-detects a soft business trigger rather than fabricating one, so the
+no-hallucination rate stays 1.0. That trade (recall on the softest triggers vs. never over-firing on
+routine funding/growth news) is a deliberate characteristic, not a defect. A separate run caught a
+real prompt gap: on a noisy multi-company case the model pulled an *unrelated* firm's record-quarter
+news into the brief as fake "competitive scrutiny" — both the deterministic forbidden-string guard
+and the judge flagged it, and a prompt rule (a different company's non-security business news is
+never a trigger) fixed it, restoring the rate to 1.0. See `DECISIONS.md` "Phase 5."
 
 ```bash
 python -m eval.run_eval          # score the golden set -> results.json

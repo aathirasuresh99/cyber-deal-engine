@@ -16,8 +16,13 @@ _CVE_RE = re.compile(r"CVE-\d{4}-\d+", re.IGNORECASE)
 
 
 def _brief_text(brief: Brief) -> str:
-    """All human-readable fields of a brief flattened into one searchable string."""
-    return " ".join([*brief.key_points, brief.opener, *brief.objection_questions])
+    """All human-readable fields of a brief flattened into one searchable string.
+    Includes the Phase 5 fields (why_now, stakeholders, discovery_questions) so the deterministic
+    fabrication guards scan the whole brief, not just the original three fields."""
+    return " ".join([
+        brief.why_now, *brief.key_points, brief.opener,
+        *brief.stakeholders, *brief.discovery_questions, *brief.objection_questions,
+    ])
 
 
 def run_checks(case: dict, brief: Brief) -> Dict[str, bool]:
