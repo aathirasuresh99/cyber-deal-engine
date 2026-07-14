@@ -1,0 +1,51 @@
+name: Watchlist breach alert
+
+# Runs daily, fetches new security signals for every watchlist company, and emails only the ones
+# not seen before. State (which signals were already emailed) is committed back to the repo in
+# data/seen_signals.json, because the runner is ephemeral and cannot keep a database between runs.
+
+on:
+  schedule:
+    # 01:30 UTC == 07:00 IST. Change to taste (cron is in UTC).
+    - cron: "30 1 * * *"
+  workflow_dispatch: {} # adds a "Run workflow" button for manual/one-off runs
+
+permissions:
+  contents: write # needed to commit the updated seen-state file
+
+concurrency:
+  group: watchlist-alert
+  cancel-in-progress: false
+
+jobs:
+  alert:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Fetch new signals and email
+        env:
+          NEWSAPI_KEY: ${{ secrets.NEWSAPI_KEY }}
+          GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          ALERT_TO: ${{ secrets.ALERT_TO }}
+        run: python -m ingest.watchlist_alert
+
+      - name: Commit updated seen-state
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/seen_signals.json
+          if git diff --cached --quiet; then
+            echo "No seen-state changes to commit."
+          else
+            git commit -m "chore: update watchlist seen-signals [skip ci]"
+            git push
+          fi

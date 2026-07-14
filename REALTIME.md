@@ -54,6 +54,34 @@ jobs:
           SIGNALS_DB_URL: ${{ secrets.SIGNALS_DB_URL }}   # point at a persistent Postgres
 ```
 
+## 3. Daily email alert on NEW signals (shipped)
+
+`ingest/watchlist_alert.py` + `.github/workflows/watchlist-alert.yml` run every day, fetch live
+signals for every watchlist company, and **email only the signals not seen before** — so you get a
+note when a tracked account has a fresh breach/CVE/security-news hit, not a repeat of yesterday's.
+
+State is kept in `data/seen_signals.json` (URLs already emailed). The runner is ephemeral, so the
+workflow commits that file back to the repo after each run — that's how "new since last time" works
+without a database. Old entries prune after 180 days so the file stays small.
+
+```bash
+python -m ingest.watchlist_alert            # fetch, dedup, email new signals
+python -m ingest.watchlist_alert --dry-run  # print the digest instead of sending (no key needed)
+```
+
+**Repo secrets to set** (Settings → Secrets and variables → Actions):
+
+| secret | what |
+|---|---|
+| `NEWSAPI_KEY` | news source (NVD is keyless) |
+| `GMAIL_ADDRESS` | the Gmail account that sends |
+| `GMAIL_APP_PASSWORD` | a Gmail **App Password** (not your login password; needs 2FA on) |
+| `ALERT_TO` | recipient(s), comma-separated (defaults to `GMAIL_ADDRESS`) |
+
+Scope note: this alerts once per day on the schedule, not the instant a breach happens — true
+push-on-event would need continuous monitoring infra. The digest lists signals; open the **Live
+brief** tab to turn any into a full brief.
+
 ### Persistence caveat (honest)
 
 The default store is a local SQLite file. On an ephemeral host (Streamlit Community Cloud) that
