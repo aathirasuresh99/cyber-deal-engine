@@ -258,3 +258,52 @@ true-positive survived: adv-multi-company-noise still revised dirty->clean. has_
 ran) = variance between independently drafted arms; the one revised case held faithfulness at 5.
 This is now the concrete motivation for the shared-draft ablation (follow-up #2): make both arms
 start from the agent's attempt-0 draft so the comparison isolates the loop, not drafting noise.
+
+## [2026-07] Shared-draft ablation (follow-up #2, implemented)
+**Decision:** The ablation now runs the agent ONCE per case and scores two arms off that single
+run — plain = the agent's attempt-0 draft (exposed as `AgentResult.first_draft`), agent = the final
+brief. Previously the plain arm was a separate `safe_generate()` call.
+
+**Context:** The adversarial run showed every faithfulness delta landing on `rev=0` cases — where
+the loop never ran — proving the plain-vs-agent gap was variance between two independent draws, not
+the loop's effect. A comparison can't attribute a delta to the loop if the two arms didn't share a
+starting point.
+
+**Why:** With both arms sharing the identical first draft, a `rev=0` case now shows an exactly zero
+delta *by construction*, so any non-zero delta is unambiguously the reflection loop. It's also
+cheaper — the plain arm is free (reuses the draft) instead of a second generation.
+
+**Verified (offline, mocked):** clean-first-try → `first_draft is brief`, `revisions=0`;
+revise-once → `first_draft` stays the attempt-0 draft while `brief` is the revised one. Live
+re-run of both slices pending to refresh the README numbers.
+
+**Revisit if:** we want to measure generation variance itself — then deliberately run independent
+draws again, as a separate experiment, not the default.
+
+## [2026-07] Embeddings/reranking retrieval (opt-in, filter-then-rank)
+**Decision:** Added a second retrieval stage: after the existing NVD name-collision *precision
+filter*, optionally rerank the survivors most-security-relevant-first via embedding similarity
+(`text-embedding-3-small`) to a market-aware relevance query built from `profile.breach_keywords`.
+Opt-in via `RETRIEVAL_MODE=embedding` (default stays `keyword`).
+
+**Context:** Retrieval v0 was keyword-filter + recency order. The roadmap called for embeddings; the
+honest value is *ranking* — when a company has more signals than fit the context window, the
+breach/CVE should lead over a generic name-drop.
+
+**Alternatives considered:** Replace the keyword filter with pure semantic retrieval (rejected —
+similarity is soft and would rank an unrelated-but-similar CVE highly, reintroducing the exact
+misattribution noise the filter exists to kill); a vector DB / Chroma (overkill for a bounded
+watchlist with few signals per company).
+
+**Why filter-then-rank, never rank-instead-of-filter:** correctness first, relevance second. The
+hard company-name filter guarantees the reranker only ever sorts genuinely-relevant items, so
+reranking can reorder but never resurrect noise. Kept it opt-in and fail-safe: 0/1 signals or any
+embedding error degrades silently to the given order, so retrieval never becomes a point of
+failure, and `embed_fn` is injectable so the ranking logic is testable offline without a live call.
+
+**Verified (offline, fake embedder):** a breach signal is floated above product/hire noise; an
+embedder that raises returns the original order unchanged; a single-signal list is a no-op.
+
+**Revisit if:** watchlists grow large enough that per-signal embedding cost or latency matters
+(then cache embeddings on the Signal row), or a precision/recall eval shows reranking changes brief
+quality enough to make it the default.

@@ -44,6 +44,11 @@ class AgentResult:
     revisions: int = 0
     faithful: bool = False
     error: Optional[str] = None
+    # The attempt-0 draft, before any critique/revision. This is what "plain generation" would
+    # have produced. Exposing it lets the ablation compare plain vs. agent on the SAME draft, so
+    # the measured delta is the loop's effect, not run-to-run generation noise. When revisions==0
+    # it is identical to `brief`.
+    first_draft: Optional[Brief] = None
 
     @property
     def clean_first_try(self) -> bool:
@@ -68,19 +73,22 @@ def generate_brief_reflective(
     except Exception as e:  # noqa: BLE001 - surface any SDK/validation error safely
         return AgentResult(brief=None, error=str(e))
 
+    first_draft = draft  # keep the untouched attempt-0 draft for the ablation
+
     for attempt in range(max_revisions + 1):
         try:
             verdict: Critique = critique(company, context, draft, model)
         except Exception as e:  # noqa: BLE001 - a critic failure shouldn't lose the draft
             # Return the best draft we have; mark faithful unknown via error note.
             return AgentResult(brief=draft, passes=passes, revisions=attempt,
-                               faithful=False, error=f"critic failed: {e}")
+                               faithful=False, error=f"critic failed: {e}", first_draft=first_draft)
 
         passes.append(Pass(attempt=attempt, faithful=verdict.faithful,
                            unsupported_claims=verdict.unsupported_claims, notes=verdict.notes))
 
         if verdict.faithful:
-            return AgentResult(brief=draft, passes=passes, revisions=attempt, faithful=True)
+            return AgentResult(brief=draft, passes=passes, revisions=attempt,
+                               faithful=True, first_draft=first_draft)
 
         if attempt == max_revisions:
             break  # out of budget; return the last draft, unfaithful
@@ -90,9 +98,10 @@ def generate_brief_reflective(
             draft = generate_brief(company, context, model, profile, feedback=feedback)
         except Exception as e:  # noqa: BLE001
             return AgentResult(brief=draft, passes=passes, revisions=attempt,
-                               faithful=False, error=f"revision failed: {e}")
+                               faithful=False, error=f"revision failed: {e}", first_draft=first_draft)
 
-    return AgentResult(brief=draft, passes=passes, revisions=max_revisions, faithful=False)
+    return AgentResult(brief=draft, passes=passes, revisions=max_revisions,
+                       faithful=False, first_draft=first_draft)
 
 
 def _format_trace(res: AgentResult) -> str:

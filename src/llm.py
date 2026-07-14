@@ -13,6 +13,16 @@ _client = OpenAI()  # picks up OPENAI_API_KEY from the environment
 # See eval/model_comparison.json and DECISIONS.md.
 DEFAULT_MODEL = "gpt-4o-mini"
 
+# Embedding model for semantic retrieval (Phase 2 upgrade). text-embedding-3-small is cheap
+# ($0.02 / 1M tokens) and more than enough to rank a bounded watchlist's signals by relevance.
+EMBED_MODEL = "text-embedding-3-small"
+
+
+def embed_texts(texts: list[str], model: str = EMBED_MODEL) -> list[list[float]]:
+    """Batch-embed texts in one API call. Order of outputs matches order of inputs."""
+    resp = _client.embeddings.create(model=model, input=texts)
+    return [d.embedding for d in resp.data]
+
 
 def complete(prompt: str, model: str = DEFAULT_MODEL, system: str = "") -> str:
     """Plain text completion. Used for quick calls (e.g. the LLM-judge later)."""

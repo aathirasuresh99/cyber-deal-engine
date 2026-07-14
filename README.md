@@ -40,7 +40,7 @@ src/
   critic.py    # runtime faithfulness critic (same standard the eval judges)
   agent.py     # reflection agent: draft -> critique -> revise
   store.py     # SQLAlchemy signal storage (dedup by url)
-  retrieve.py  # per-company retrieval + noise filtering
+  retrieve.py  # per-company retrieval: precision filter + opt-in embedding rerank
   config.py    # geo-agnostic market profile
 ingest/
   nvd.py       # CVE ingester (NVD 2.0, keyless)
@@ -184,9 +184,10 @@ generation noise, so the **per-case trace is the honest view**:
 
 The lesson is sharper than "agents help": **a reflection loop is only as good as its critic's
 precision** — a high-recall/low-precision critic trades hallucination fixes for erased signal. And
-the faithfulness confound is the clean argument for the next fix: have both arms share the agent's
-first draft, so the ablation measures the loop's effect instead of drafting noise. (See
-`DECISIONS.md`.)
+the faithfulness confound drove the next fix (now implemented): both arms share the agent's
+attempt-0 draft (`AgentResult.first_draft`), so a case the loop never revised shows an exactly zero
+delta by construction and any non-zero delta is unambiguously the loop — not drafting noise. (Live
+re-run pending to refresh the numbers above; see `DECISIONS.md`.)
 
 ## Design decisions
 See `DECISIONS.md` for scope choices and *why* (target market, coverage model, sources, hero insight).

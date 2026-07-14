@@ -1,9 +1,18 @@
 """Ablation: does the reflection agent actually beat plain generation?
 
-Runs every golden case two ways — plain single-pass generation vs. the draft->critique->revise
-agent — and scores both with the SAME deterministic checks and LLM judge used everywhere else.
-The question this answers, in numbers a PM can defend: is the extra cost of self-critique buying
-real faithfulness, and does it fix cases the single pass gets wrong?
+Runs every golden case through the agent ONCE and scores two arms off that single run:
+  - plain  = the agent's attempt-0 draft (exactly what single-pass generation produces)
+  - agent  = the final brief after critique + any revisions
+Because both arms share the identical first draft, any metric delta is the reflection loop's
+effect — NOT run-to-run generation variance between two independent draws. The earlier version
+generated the plain arm with a separate safe_generate() call; at n=10 that confounded loop
+effects with drafting noise (every faithfulness delta landed on rev=0 cases, where the loop never
+ran). Sharing the draft is that fix, so a rev=0 case now shows an exactly zero delta by
+construction.
+
+Both arms are scored with the SAME deterministic checks and LLM judge used everywhere else. The
+question this answers, in numbers a PM can defend: is the extra cost of self-critique buying real
+faithfulness, and does it fix cases the single pass gets wrong?
 
 Metrics per arm:
   - no_hallucination_rate  (deterministic north star)
@@ -12,11 +21,12 @@ Metrics per arm:
 
 Agent-only:
   - cases_revised          (how often the critic triggered a rewrite)
-  - flips_to_clean         (cases the plain arm got dirty that the agent fixed)  <- the payoff
+  - flips_to_clean         (cases the plain draft was dirty that the agent fixed)  <- the payoff
   - flips_to_dirty         (regressions — should be 0)
 
-Writes eval/agent_comparison.json. Costs credits: ~28 cases, plain = 1 call each, agent = up to
-(1 + max_revisions) generations + a critique per pass. Judge adds one call per brief per arm.
+Writes eval/agent_comparison.json. Costs credits: agent = up to (1 + max_revisions) generations +
+a critique per pass; the plain arm is free (reuses the agent's draft). Judge adds one call per
+brief per arm.
 
 Run (needs OPENAI_API_KEY; set JUDGE_MODEL=claude-sonnet-5 for the independent grader):
     python -m eval.compare_agent                          # in-distribution golden set
@@ -35,7 +45,6 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from src.brief import safe_generate  # noqa: E402
 from src.agent import generate_brief_reflective  # noqa: E402
 from eval import checks as C  # noqa: E402
 from eval.judge import judge_brief  # noqa: E402
@@ -92,18 +101,13 @@ def evaluate(golden: Path) -> dict:
     cases = load_cases(golden)
     rows = []
     for case in cases:
-        # --- plain arm ---
-        plain_brief = safe_generate(case["company"], case["context"])
-        if not hasattr(plain_brief, "model_dump"):
-            rows.append({"id": case["id"], "error": f"plain gen failed: {plain_brief.get('error')}"})
-            continue
-        plain = _score(case, plain_brief)
-
-        # --- reflective arm ---
+        # One agent run feeds BOTH arms: plain = its attempt-0 draft, agent = its final brief.
+        # This is the shared-draft ablation — the arms differ only by the loop, not by draw.
         res = generate_brief_reflective(case["company"], case["context"], max_revisions=MAX_REVISIONS)
-        if res.brief is None:
+        if res.first_draft is None or res.brief is None:
             rows.append({"id": case["id"], "error": f"agent failed: {res.error}"})
             continue
+        plain = _score(case, res.first_draft)
         agent = _score(case, res.brief)
 
         rows.append({
