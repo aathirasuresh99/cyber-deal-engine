@@ -42,7 +42,24 @@ US_TECH = MarketProfile(
     ],
 )
 
-MARKETS = {p.key: p for p in (INDIA_MIDMARKET, US_TECH)}
+# Region-neutral default: no single country's regime is assumed. The frameworks below are a
+# cross-region MENU of examples the model can draw from — the brief prompt tells it to match the
+# regime to each company's OWN jurisdiction/sector, so this profile works for companies anywhere.
+GLOBAL = MarketProfile(
+    key="global",
+    label="companies worldwide (any sector, any region)",
+    compliance_frameworks=[
+        "GDPR", "SOC 2", "ISO 27001", "PCI-DSS", "HIPAA", "CCPA", "DPDP Act",
+    ],
+    breach_keywords=[
+        "data breach", "data leak", "ransomware", "hacked", "exposed database",
+        "vulnerability", "CVE", "zero-day", "phishing", "credential leak",
+        "supply-chain attack", "misconfiguration",
+    ],
+)
+
+MARKETS = {p.key: p for p in (GLOBAL, INDIA_MIDMARKET, US_TECH)}
 
 # --- The single switch that chooses the target market for this build ---
-ACTIVE_MARKET: MarketProfile = INDIA_MIDMARKET
+# GLOBAL = no geographic lean; briefs any company and matches compliance to the company's own region.
+ACTIVE_MARKET: MarketProfile = GLOBAL

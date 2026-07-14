@@ -76,7 +76,8 @@ class Brief(BaseModel):
     stakeholders: List[str] = Field(
         ..., min_length=2, max_length=4,
         description="2-4 LIKELY roles to engage and why, inferred from the company's sector and the "
-                    "trigger (e.g. 'CISO — owns breach response', 'DPO — accountable for DPDP'). These "
+                    "trigger (e.g. 'CISO — owns breach response', 'DPO — accountable for data-protection "
+                    "compliance in the company's own region'). These "
                     "are ROLE-based suggestions, NOT named individuals and NOT asserted facts about the "
                     "company's actual org. Never invent a person's name or claim who works there.",
     )
