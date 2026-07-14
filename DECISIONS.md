@@ -307,3 +307,71 @@ embedder that raises returns the original order unchanged; a single-signal list 
 **Revisit if:** watchlists grow large enough that per-signal embedding cost or latency matters
 (then cache embeddings on the Signal row), or a precision/recall eval shows reranking changes brief
 quality enough to make it the default.
+
+## [2026-07] Phase 5 — broaden "signal" to the full buying-trigger taxonomy
+**Decision:** Redefined what counts as a sellable signal from *breach/vulnerability only* to the
+full set of cyber **buying triggers** a rep can open on: breach/incident, disclosed vulnerability,
+compliance pressure, peer/industry breach, M&A or fundraising, growth/change (cloud migration, new
+SaaS, expansion), customer security demand, insurer/board pressure, visibility gap
+(`src/schema.py::Trigger`, ordered by sales urgency). The `Brief` now carries an ordered
+`triggers` list; `has_signal` means "≥1 real trigger present," and the generator leads the
+opener/first key point with the highest-urgency trigger.
+
+**Context:** A breach/vuln-only definition almost never fires on real mid-market companies on any
+given day — so the watchlist sat empty and the product's core use case couldn't be validated. Reps
+in reality sell on *any* of these triggers, not just after a breach. Broadening what *counts* is
+the unlock; it does **not** loosen the never-fabricate rule.
+
+**The never-fabricate rule is unchanged, and the boundary was made explicit.** Every trigger must
+still trace to a real, cited event. What broadened is *risk framing*: stating the security
+implication of a real business event is now explicitly allowed (a cited cloud migration "widens the
+attack surface," a cited acquisition "triggers due diligence," a cited fundraise "grows what must be
+secured"). What stays forbidden is asserting an event that isn't in context — e.g. claiming data
+*was* breached when only a vulnerability or a growth event was disclosed. The critic
+(`src/critic.py`) and judge (`eval/judge.py`) were updated in lockstep so runtime and offline share
+one boundary, including the peer/industry-breach exception (another company's breach is allowed
+*only* when framed as raising the prospect's board-level urgency, never as the prospect's own
+incident).
+
+**Alternatives considered:** keep the narrow definition and just ingest more aggressively (rejected
+— the signal is genuinely rare per-day, so this never fixes the empty-watchlist problem and tempts
+the model to over-read weak news as a breach); make `has_signal` multi-class now (deferred — see
+Open Questions; boolean + an ordered trigger list already gives the UI what it needs).
+
+**Verified (offline):** schema accepts an ordered `triggers` list and forces it empty on
+`has_signal=false`; the generator prompt enumerates all nine trigger types; critic/judge prompts
+carry the broadened risk-framing + peer-breach language; the deterministic fabricated-CVE guard
+still fires.
+
+> ⚠️ **Eval re-label required (open, honest caveat).** The broadened `has_signal` definition
+> **invalidates the existing golden labels**: cases in `eval/golden.jsonl` /
+> `golden_adversarial.jsonl` that were labelled `has_signal=false` under the breach/vuln-only rule
+> may now legitimately be `true` (they contain an M&A, growth, or compliance trigger). Until the
+> golden sets are re-labelled against the new taxonomy, the pre-Phase-5 eval numbers (no-hallucination
+> 1.0, faithfulness ~4.9) **do not automatically carry over** and must not be quoted as current.
+> Re-labelling + a fresh eval run is the immediate next task before any new quality claim.
+
+## [2026-07] Real-time: on-demand live fetch + scheduled refresh (both)
+**Decision:** Added `src/live.py` — an on-demand path that queries NVD + NewsAPI *live* for any
+company at request time, runs the same precision-filter/rerank as the stored path, and briefs with
+no dependency on a persisted DB. Kept the scheduled watchlist refresh (`ingest/run_ingest.py`) for
+tracked accounts. Documented both in `REALTIME.md`.
+
+**Context:** The user needs the product to work in real time on companies that were never ingested,
+and the public Streamlit host has an ephemeral filesystem, so a stored DB doesn't survive a restart
+there. On-demand live fetch is therefore the primary mechanism; scheduled refresh is for a durable
+(Postgres) watchlist deployment.
+
+**Why not scheduled-only:** it can't answer "brief me on this prospect now" and it can't persist on
+the ephemeral demo host. Live fetch degrades gracefully — a missing NewsAPI key or a source outage
+skips that source with a note and falls back to generic discovery, never fabrication.
+
+## [2026-07] UI redesign — search-first, signals as cards, trigger badges
+**Decision:** Reworked `app.py` into three tabs led by **🔍 Live brief** (type any company →
+fetch live → brief), with watchlist quick-pick buttons, fetched signals rendered as source-tagged
+cards with links, and detected buying triggers shown as urgency-coloured pills. Kept Watchlist and
+Paste tabs; kept the reflection-agent toggle.
+
+**Why:** the old UI was a bare selectbox + textarea that didn't surface *what* the brief was built
+from or *why* it fired. Cards + trigger badges make the grounding visible (every claim traces to a
+shown signal) and make the real-time path the obvious front door.

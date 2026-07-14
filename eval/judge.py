@@ -42,10 +42,21 @@ _JUDGE_SYSTEM = (
     "context. A brief must never assert breaches, CVEs, dates, or numbers that are not in the "
     "context. Note: a generic compliance angle (e.g. DPDP, RBI) is acceptable background and is "
     "NOT an unsupported claim, but a specific fabricated incident IS. "
-    "RISK FRAMING IS ALLOWED: stating the security RISK a disclosed weakness implies (e.g. an "
-    "unauthenticated SQL-injection CVE 'puts customer data at risk') is reasonable interpretation, "
-    "NOT an unsupported claim. What is unsupported is asserting an event HAPPENED when the context "
-    "does not say so (e.g. claiming data WAS breached when only a vulnerability was disclosed). "
+    "RISK FRAMING IS ALLOWED: stating the security RISK or implication a real, cited event carries "
+    "is reasonable interpretation, NOT an unsupported claim. This covers (a) disclosed weaknesses — "
+    "an unauthenticated SQL-injection CVE 'puts customer data at risk'; AND (b) cited BUSINESS events "
+    "used as buying triggers — a cloud migration 'widens the attack surface', an acquisition "
+    "'triggers security due diligence', a fundraise-fuelled expansion 'grows what must be secured'. "
+    "As long as the underlying event is in the context, framing its security implication is "
+    "supported. What is unsupported is asserting an event HAPPENED when the context does not say so "
+    "(e.g. claiming data WAS breached when only a vulnerability or a growth event was disclosed). "
+    "PEER / INDUSTRY BREACH: a breach at a DIFFERENT company is acceptable ONLY when framed "
+    "explicitly as another company's breach raising the prospect's board-level urgency; presenting "
+    "it as the prospect's OWN incident is misattribution and unsupported. "
+    "GUIDANCE vs FACT: the brief includes role-based STAKEHOLDER suggestions and DISCOVERY QUESTIONS "
+    "— these are advice, not claims about the company. Treat them as unsupported ONLY if they invent "
+    "a specific fact (a named person, or a breach/tool/number the context lacks, including a question "
+    "that presupposes one); a generic role or an open question is fine. "
     "If the context is empty, a "
     "faithful brief offers only generic discovery angles and asserts no specific facts."
 )
@@ -53,8 +64,11 @@ _JUDGE_SYSTEM = (
 
 def _brief_text(brief: Brief) -> str:
     return (
+        f"Why now: {brief.why_now}\n"
         f"Key points: {brief.key_points}\n"
         f"Opener: {brief.opener}\n"
+        f"Stakeholders (role guidance): {brief.stakeholders}\n"
+        f"Discovery questions: {brief.discovery_questions}\n"
         f"Objection questions: {brief.objection_questions}\n"
         f"has_signal flag: {brief.has_signal}"
     )

@@ -5,14 +5,14 @@
     "plain": {
       "n": 10,
       "no_hallucination_rate": 0.7,
-      "has_signal_accuracy": 0.9,
-      "judge_faithfulness_avg": 4.89
+      "has_signal_accuracy": 1.0,
+      "judge_faithfulness_avg": 4.7
     },
     "agent": {
       "n": 10,
       "no_hallucination_rate": 0.8,
       "has_signal_accuracy": 1.0,
-      "judge_faithfulness_avg": 4.2
+      "judge_faithfulness_avg": 4.7
     },
     "cases_revised": 1,
     "revised_ids": [
@@ -28,7 +28,7 @@
       "id": "adv-multi-company-noise",
       "category": "multi_company_noise",
       "plain": {
-        "has_signal_correct": false,
+        "has_signal_correct": true,
         "clean": false,
         "faithfulness": 5
       },
@@ -44,8 +44,8 @@
           "attempt": 0,
           "faithful": false,
           "flags": [
-            "RivalBank disclosed a breach of 500,000 customer records",
-            "the recent breach at RivalBank affecting 500,000 customer records"
+            "RivalBank disclosed a breach affecting 500,000 customer records",
+            "the recent breach at RivalBank affecting 500,000 records"
           ]
         },
         {
@@ -66,7 +66,7 @@
       "agent": {
         "has_signal_correct": true,
         "clean": false,
-        "faithfulness": 2
+        "faithfulness": 5
       },
       "revisions": 0,
       "agent_faithful_flag": true,
@@ -107,7 +107,7 @@
       "plain": {
         "has_signal_correct": true,
         "clean": true,
-        "faithfulness": null
+        "faithfulness": 3
       },
       "agent": {
         "has_signal_correct": true,
@@ -158,7 +158,7 @@
       "agent": {
         "has_signal_correct": true,
         "clean": true,
-        "faithfulness": 4
+        "faithfulness": 5
       },
       "revisions": 0,
       "agent_faithful_flag": true,
@@ -181,7 +181,7 @@
       "agent": {
         "has_signal_correct": true,
         "clean": true,
-        "faithfulness": 3
+        "faithfulness": 5
       },
       "revisions": 0,
       "agent_faithful_flag": true,
@@ -204,7 +204,7 @@
       "agent": {
         "has_signal_correct": true,
         "clean": true,
-        "faithfulness": 5
+        "faithfulness": 4
       },
       "revisions": 0,
       "agent_faithful_flag": true,

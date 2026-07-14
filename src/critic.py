@@ -37,7 +37,10 @@ class Critique(BaseModel):
 
 
 def _brief_text(brief: Brief) -> str:
-    return " ".join([*brief.key_points, brief.opener, *brief.objection_questions])
+    return " ".join([
+        brief.why_now, *brief.key_points, brief.opener,
+        *brief.stakeholders, *brief.discovery_questions, *brief.objection_questions,
+    ])
 
 
 def deterministic_flags(context: str, brief: Brief) -> List[str]:
@@ -61,14 +64,24 @@ _CRITIC_SYSTEM = (
     "You are a strict fact-checker for cybersecurity sales briefs. You are given the CONTEXT a "
     "brief was allowed to use and the BRIEF that was produced. Judge the brief ONLY against the "
     "context. Flag any statement that asserts a breach, CVE, date, number, or incident not present "
-    "in the context, and any security event that actually belongs to a DIFFERENT company than the "
-    "prospect. "
-    "RISK FRAMING IS ALLOWED: stating the security RISK that a disclosed weakness implies (e.g. an "
-    "unauthenticated SQL-injection CVE 'puts customer data at risk', a disclosed vulnerability 'could "
-    "be exploited') is reasonable interpretation of the context, NOT an unsupported claim. What is "
-    "unsupported is asserting that an event HAPPENED when the context does not say so — e.g. claiming "
-    "data WAS breached or exfiltrated when only a vulnerability was disclosed, or stating a number, "
-    "date, or CVE id the context never contained. "
+    "in the context, and any security event presented as the PROSPECT's OWN that the context "
+    "actually attributes to a DIFFERENT company. "
+    "RISK FRAMING IS ALLOWED: stating the security RISK or implication that a real, cited event "
+    "carries is reasonable interpretation, NOT an unsupported claim. This covers (a) disclosed "
+    "weaknesses — an unauthenticated SQL-injection CVE 'puts customer data at risk', a disclosed "
+    "vulnerability 'could be exploited'; AND (b) cited BUSINESS events used as buying triggers — a "
+    "cloud migration 'widens the attack surface', an acquisition 'triggers security due diligence on "
+    "both environments', a fundraise-fuelled expansion 'grows what must be secured', new SaaS/remote "
+    "work 'expands the identity and access footprint'. As long as the underlying event (the CVE, the "
+    "migration, the acquisition, the fundraise) is actually in the context, framing its security "
+    "implication is supported. What is unsupported is asserting that an event HAPPENED when the "
+    "context does not say so — e.g. claiming data WAS breached or exfiltrated when only a "
+    "vulnerability or a growth event was disclosed, or stating a number, date, or CVE id the context "
+    "never contained. "
+    "PEER / INDUSTRY BREACH: a breach at a DIFFERENT company may appear as a legitimate "
+    "peer_or_industry_breach angle — but ONLY when the brief frames it explicitly as another "
+    "company's breach that raises the prospect's board-level urgency. If the brief presents another "
+    "company's breach as the PROSPECT's own incident, that is misattribution and must be flagged. "
     "PRECISION — do not over-flag: before flagging a claim, confirm the fact is genuinely ABSENT "
     "from the context. If the context states an event about the prospect, a brief that repeats that "
     "event is SUPPORTED — even when the context also mentions other, unrelated companies. Multiple "
@@ -79,7 +92,13 @@ _CRITIC_SYSTEM = (
     "or when the context attributes that event to a DIFFERENT company. When unsure whether a claim is "
     "present in the context, re-read the context before deciding, and do not flag a claim that is in fact there. "
     "A generic compliance angle (e.g. DPDP, RBI) stated as background is acceptable and is NOT "
-    "unsupported. If the context is empty, only fully generic discovery language is faithful; any "
+    "unsupported. "
+    "GUIDANCE vs FACT: the brief also contains role-based STAKEHOLDER suggestions (e.g. 'CISO — owns "
+    "breach response') and DISCOVERY QUESTIONS the rep should ask. These are advice, not assertions "
+    "about the company — flag them ONLY if they invent a specific fact: a named individual, or a "
+    "breach/tool/number the context never stated (including a question that presupposes such a fact). "
+    "Naming a generic role or asking an open question is NOT an unsupported claim. "
+    "If the context is empty, only fully generic discovery language is faithful; any "
     "specific asserted fact is unsupported."
 )
 

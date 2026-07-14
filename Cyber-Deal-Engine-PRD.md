@@ -143,15 +143,14 @@ not the default. See README "The reflection agent — and when it actually helps
 ## 8. Scope & roadmap
 
 **In scope now:** watchlist + paste modes, NVD + news ingestion, structured generation with
-guardrails, eval harness (deterministic + independent judge), optional reflection agent.
+guardrails, eval harness (deterministic + independent judge), optional reflection agent, opt-in
+embedding reranker on retrieval, and a **live public demo**
+(https://cyber-deal-engine.streamlit.app/).
 
 **Deferred, evidence-backed:**
-- Embeddings/reranking retrieval (v0 is keyword-only).
-- Shared-draft ablation (both arms from the agent's attempt-0 draft) to isolate loop effect from
-  generation variance.
 - On-demand (any-company) briefs, gated on watchlist no-hallucination rate holding ≥ 0.95.
 - Additional sources (CERT-In, financial/funding); social deprioritized on cost/legal friction.
-- Packaging: deployed demo URL, eval dashboard, cost model, demo video.
+- Packaging: eval dashboard, cost model, demo video.
 
 ## 9. Open questions
 

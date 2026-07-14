@@ -1,14 +1,26 @@
 # Cyber Deal Engine
 
 Turns cybersecurity signals into pre-meeting sales briefs for cybersecurity sales reps.
-Given a prospect company, it produces 3 key points (breach/vulnerability first), a meeting
-opener, and 3 objection questions — grounded in real signals, never fabricated.
+Given a prospect company, it produces 3 key points (led by the highest-urgency buying trigger), a
+meeting opener, and 3 objection questions — grounded in real signals, never fabricated.
+
+A "signal" is any cyber **buying trigger** a rep can open on — breach/incident, disclosed
+vulnerability, compliance pressure, peer/industry breach, M&A or fundraising, growth/change,
+customer security demand, insurer/board pressure, or a visibility gap (`src/schema.py`). Each
+trigger must trace to a real, cited event; broadening what *counts* never loosens the
+never-fabricate rule. Works in real time: the **🔍 Live brief** tab fetches signals live for any
+company (`src/live.py`), and a scheduled watchlist refresh keeps tracked accounts warm — see
+`REALTIME.md`.
+
+**Live demo:** https://cyber-deal-engine.streamlit.app/ — use the *Paste your own* tab (paste any
+news/CVE text) and toggle the reflection agent to watch it self-critique. (The *Watchlist* tab
+needs a locally ingested signal DB, so it's empty on the public demo by design.)
 
 > Status: **signal pipeline + evaluation harness + reflection agent working.** Ingests real CVE
 > (NVD) and news (NewsAPI) signals, stores and retrieves them per company, generates a structured
 > brief, scores quality with an automated eval harness (deterministic guardrails + LLM-as-judge),
-> and can self-critique and revise its own drafts against that same faithfulness standard. Richer
-> retrieval (embeddings/reranking) comes next (see `Cyber-Deal-Engine-Build-Guide.md`).
+> and can self-critique and revise its own drafts against that same faithfulness standard.
+> Retrieval adds an opt-in embedding reranker on top of the precision filter (`RETRIEVAL_MODE=embedding`).
 
 ## Quick start
 
@@ -41,6 +53,7 @@ src/
   agent.py     # reflection agent: draft -> critique -> revise
   store.py     # SQLAlchemy signal storage (dedup by url)
   retrieve.py  # per-company retrieval: precision filter + opt-in embedding rerank
+  live.py      # on-demand live fetch (NVD + news) — real-time brief for any company
   config.py    # geo-agnostic market profile
 ingest/
   nvd.py       # CVE ingester (NVD 2.0, keyless)
@@ -75,6 +88,13 @@ have **Claude grade OpenAI's output** — a genuinely independent grader.
 
 The headline metric is the **no-hallucination rate** (share of briefs that break none of the
 fabrication guards). Results are written to `eval/results.json` so runs are comparable over time.
+
+> ⚠️ **Eval numbers below predate the Phase 5 trigger broadening.** Widening `has_signal` to the
+> full buying-trigger taxonomy invalidates the old golden labels (cases labelled "no signal" under
+> the breach/vuln-only rule may now legitimately be a signal via M&A/growth/compliance). The golden
+> sets need re-labelling and a fresh run before these figures can be quoted as current — see
+> `DECISIONS.md` "Phase 5." The fabrication guardrails (never invent a CVE/date/number/incident) are
+> unchanged and still enforced at runtime and in the deterministic checks.
 
 ```bash
 python -m eval.run_eval          # score the golden set -> results.json
