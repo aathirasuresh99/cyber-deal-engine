@@ -3,25 +3,35 @@
   "rows": [
     {
       "model": "gpt-4o",
-      "cases_scored": 10,
+      "repeats": 3,
       "cases_errored": 0,
       "no_hallucination_rate": 1.0,
       "has_signal_accuracy": 1.0,
-      "faithfulness_avg": 4.6,
-      "total_tokens": 7670,
-      "total_cost_usd": 0.03285,
-      "cost_per_brief_usd": 0.00329
+      "faithfulness_mean": 4.67,
+      "faithfulness_stdev": 0.31,
+      "faithfulness_per_pass": [
+        4.6,
+        4.4,
+        5.0
+      ],
+      "cost_per_brief_usd": 0.00327,
+      "total_cost_usd": 0.09799
     },
     {
       "model": "gpt-4o-mini",
-      "cases_scored": 10,
+      "repeats": 3,
       "cases_errored": 0,
       "no_hallucination_rate": 1.0,
       "has_signal_accuracy": 1.0,
-      "faithfulness_avg": 5.0,
-      "total_tokens": 7506,
-      "total_cost_usd": 0.00187,
-      "cost_per_brief_usd": 0.00019
+      "faithfulness_mean": 4.9,
+      "faithfulness_stdev": 0.0,
+      "faithfulness_per_pass": [
+        4.9,
+        4.9,
+        4.9
+      ],
+      "cost_per_brief_usd": 0.00019,
+      "total_cost_usd": 0.00564
     }
   ]
 }

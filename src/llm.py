@@ -30,3 +30,18 @@ def complete(prompt: str, model: str = DEFAULT_MODEL, system: str = "") -> str:
 def client() -> OpenAI:
     """Expose the raw client for structured-output parsing in brief.py."""
     return _client
+
+
+# Anthropic is created lazily so the app still runs with only an OPENAI_API_KEY.
+# It's used as a *different-provider* judge in Phase 3 (see eval/judge.py): grading OpenAI's
+# output with Claude removes the "model grading its own homework" bias.
+_anthropic = None
+
+
+def anthropic_client():
+    """Lazy Anthropic client. Raises only if actually used without an ANTHROPIC_API_KEY."""
+    global _anthropic
+    if _anthropic is None:
+        from anthropic import Anthropic  # local import so the dep is optional
+        _anthropic = Anthropic()  # reads ANTHROPIC_API_KEY from the environment
+    return _anthropic

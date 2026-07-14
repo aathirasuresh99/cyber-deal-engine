@@ -5,9 +5,10 @@ actually supported by the context (faithfulness), is it on-point (relevance), co
 it (actionability). It also names any unsupported claims, which is where the real learning is.
 
 Bias note: ideally the judge is a *different* model/provider than the writer, so it isn't
-grading its own homework. The generator uses OpenAI (gpt-4o); set JUDGE_MODEL to another model
-(and later a different provider) once that's funded. Default stays gpt-4o so the harness runs
-today with one key.
+grading its own homework. The generator uses OpenAI; setting JUDGE_MODEL to a Claude model
+(e.g. "claude-sonnet-5") routes judging to Anthropic — a genuinely independent grader. The
+default stays gpt-4o so the harness runs with only an OpenAI key; point it at Claude once the
+Anthropic key is funded for the highest-integrity scores.
 """
 from __future__ import annotations
 
@@ -16,7 +17,7 @@ from typing import List
 
 from pydantic import BaseModel, Field
 
-from src.llm import client
+from src.llm import client, anthropic_client
 from src.schema import Brief
 
 JUDGE_MODEL = os.getenv("JUDGE_MODEL", "gpt-4o")
@@ -45,14 +46,16 @@ _JUDGE_SYSTEM = (
 )
 
 
-def judge_brief(context: str, brief: Brief, model: str = JUDGE_MODEL) -> JudgeVerdict:
-    """Score one brief against its context. Raises on SDK/validation error (caller handles)."""
-    brief_text = (
+def _brief_text(brief: Brief) -> str:
+    return (
         f"Key points: {brief.key_points}\n"
         f"Opener: {brief.opener}\n"
         f"Objection questions: {brief.objection_questions}\n"
         f"has_signal flag: {brief.has_signal}"
     )
+
+
+def _judge_openai(context: str, brief_text: str, model: str) -> JudgeVerdict:
     resp = client().chat.completions.parse(
         model=model,
         messages=[
@@ -63,3 +66,36 @@ def judge_brief(context: str, brief: Brief, model: str = JUDGE_MODEL) -> JudgeVe
         temperature=0.0,  # judging should be as deterministic as possible
     )
     return resp.choices[0].message.parsed
+
+
+def _judge_anthropic(context: str, brief_text: str, model: str) -> JudgeVerdict:
+    """Anthropic path. Structured output is obtained via a forced tool call whose input schema
+    is the JudgeVerdict schema, so Claude must return exactly the fields we validate."""
+    tool = {
+        "name": "record_verdict",
+        "description": "Record the evaluation verdict for the brief.",
+        "input_schema": JudgeVerdict.model_json_schema(),
+    }
+    resp = anthropic_client().messages.create(
+        model=model,
+        max_tokens=1024,
+        temperature=0.0,
+        system=_JUDGE_SYSTEM,
+        tools=[tool],
+        tool_choice={"type": "tool", "name": "record_verdict"},
+        messages=[{"role": "user",
+                   "content": f"CONTEXT:\n{context or '(empty)'}\n\nBRIEF:\n{brief_text}"}],
+    )
+    for block in resp.content:
+        if block.type == "tool_use":
+            return JudgeVerdict(**block.input)
+    raise RuntimeError("Anthropic response contained no tool_use block")
+
+
+def judge_brief(context: str, brief: Brief, model: str = JUDGE_MODEL) -> JudgeVerdict:
+    """Score one brief against its context. Routes to Anthropic for 'claude*' models, else OpenAI.
+    Raises on SDK/validation error (caller handles)."""
+    brief_text = _brief_text(brief)
+    if model.startswith("claude"):
+        return _judge_anthropic(context, brief_text, model)
+    return _judge_openai(context, brief_text, model)
