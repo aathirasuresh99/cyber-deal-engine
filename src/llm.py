@@ -8,7 +8,10 @@ load_dotenv()  # reads OPENAI_API_KEY / ANTHROPIC_API_KEY from .env
 
 _client = OpenAI()  # picks up OPENAI_API_KEY from the environment
 
-DEFAULT_MODEL = "gpt-4o"
+# gpt-4o-mini chosen over gpt-4o via eval evidence (2026-07): identical no-hallucination
+# rate (1.0) and signal accuracy (1.0), faithfulness within noise, at ~17x lower cost.
+# See eval/model_comparison.json and DECISIONS.md.
+DEFAULT_MODEL = "gpt-4o-mini"
 
 
 def complete(prompt: str, model: str = DEFAULT_MODEL, system: str = "") -> str:

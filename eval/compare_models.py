@@ -15,6 +15,7 @@ Run (needs OPENAI_API_KEY in .env):
 from __future__ import annotations
 
 import json
+import statistics
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -36,6 +37,10 @@ CANDIDATE_MODELS = ["gpt-4o", "gpt-4o-mini"]
 
 # Judge is FIXED so faithfulness is measured on one consistent scale across all rows.
 JUDGE_MODEL = "gpt-4o"
+
+# Generation runs at temperature > 0, so a single pass is noisy. Repeat each model this many
+# times and report faithfulness as mean +/- spread, so decisions rest on stable numbers.
+REPEATS = 3
 
 # USD per 1,000,000 tokens (input, output). Verify against the live pricing page before quoting.
 # Source: OpenAI pricing, confirmed 2026-07.
@@ -72,14 +77,15 @@ def cost_usd(model: str, in_tok: int, out_tok: int) -> float:
     return (in_tok / 1_000_000) * p["in"] + (out_tok / 1_000_000) * p["out"]
 
 
-def evaluate_model(model: str, cases: list[dict]) -> dict:
+def _one_pass(model: str, cases: list[dict]) -> dict:
+    """One full pass over the golden set for one model. Returns per-pass aggregates + token totals."""
     clean_flags, signal_flags, faiths = [], [], []
     tot_in = tot_out = 0
     errors = 0
     for case in cases:
         try:
             brief, in_tok, out_tok = generate_with_usage(case["company"], case["context"], model)
-        except Exception:  # noqa: BLE001 - one bad case shouldn't sink the whole model row
+        except Exception:  # noqa: BLE001 - one bad case shouldn't sink the whole pass
             errors += 1
             continue
         tot_in += in_tok
@@ -91,21 +97,46 @@ def evaluate_model(model: str, cases: list[dict]) -> dict:
         try:
             verdict = judge_brief(case["context"], brief, model=JUDGE_MODEL)
             faiths.append(verdict.faithfulness)
-        except Exception:  # noqa: BLE001 - judge flake shouldn't kill the row
+        except Exception:  # noqa: BLE001 - judge flake shouldn't kill the pass
             pass
 
     n = len(clean_flags)
-    total_cost = cost_usd(model, tot_in, tot_out)
+    return {
+        "n": n,
+        "errors": errors,
+        "no_hallucination_rate": sum(clean_flags) / n if n else None,
+        "has_signal_accuracy": sum(signal_flags) / n if n else None,
+        "faithfulness_avg": sum(faiths) / len(faiths) if faiths else None,
+        "tokens": tot_in + tot_out,
+        "in_tok": tot_in,
+        "out_tok": tot_out,
+    }
+
+
+def evaluate_model(model: str, cases: list[dict], repeats: int = REPEATS) -> dict:
+    """Run `repeats` full passes and report faithfulness as mean +/- spread across passes."""
+    passes = [_one_pass(model, cases) for _ in range(repeats)]
+    faith_per_pass = [p["faithfulness_avg"] for p in passes if p["faithfulness_avg"] is not None]
+    in_tok = sum(p["in_tok"] for p in passes)
+    out_tok = sum(p["out_tok"] for p in passes)
+    total_cost = cost_usd(model, in_tok, out_tok)
+    briefs = sum(p["n"] for p in passes)
+
+    def _avg(key):
+        vals = [p[key] for p in passes if p[key] is not None]
+        return round(sum(vals) / len(vals), 3) if vals else None
+
     return {
         "model": model,
-        "cases_scored": n,
-        "cases_errored": errors,
-        "no_hallucination_rate": round(sum(clean_flags) / n, 3) if n else None,
-        "has_signal_accuracy": round(sum(signal_flags) / n, 3) if n else None,
-        "faithfulness_avg": round(sum(faiths) / len(faiths), 2) if faiths else None,
-        "total_tokens": tot_in + tot_out,
+        "repeats": repeats,
+        "cases_errored": sum(p["errors"] for p in passes),
+        "no_hallucination_rate": _avg("no_hallucination_rate"),
+        "has_signal_accuracy": _avg("has_signal_accuracy"),
+        "faithfulness_mean": round(statistics.mean(faith_per_pass), 2) if faith_per_pass else None,
+        "faithfulness_stdev": round(statistics.stdev(faith_per_pass), 2) if len(faith_per_pass) > 1 else 0.0,
+        "faithfulness_per_pass": [round(f, 2) for f in faith_per_pass],
+        "cost_per_brief_usd": round(total_cost / briefs, 5) if briefs else None,
         "total_cost_usd": round(total_cost, 5),
-        "cost_per_brief_usd": round(total_cost / n, 5) if n else None,
     }
 
 
@@ -115,13 +146,15 @@ def main() -> None:
     OUT.write_text(json.dumps({"judge_model": JUDGE_MODEL, "rows": rows}, indent=2))
 
     print("\n=== Cyber Deal Engine — model comparison ===")
-    print(f"(judge held fixed at {JUDGE_MODEL}; cost is generation only)\n")
-    hdr = f"{'model':<14}{'no-halluc':>10}{'signal-acc':>12}{'faith/5':>9}{'$/brief':>10}{'$ total':>10}"
+    print(f"(judge held fixed at {JUDGE_MODEL}; {REPEATS} passes/model; cost is generation only)\n")
+    hdr = f"{'model':<14}{'no-halluc':>10}{'signal-acc':>12}{'faith/5 (mean±sd)':>20}{'$/brief':>10}"
     print(hdr)
     print("-" * len(hdr))
     for r in rows:
+        faith = f"{r['faithfulness_mean']} ± {r['faithfulness_stdev']}"
         print(f"{r['model']:<14}{str(r['no_hallucination_rate']):>10}{str(r['has_signal_accuracy']):>12}"
-              f"{str(r['faithfulness_avg']):>9}{r['cost_per_brief_usd']:>10}{r['total_cost_usd']:>10}")
+              f"{faith:>20}{r['cost_per_brief_usd']:>10}")
+        print(f"{'':>14}per-pass faithfulness: {r['faithfulness_per_pass']}")
     print(f"\nFull results written to {OUT.name}")
 
 

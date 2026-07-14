@@ -104,3 +104,18 @@ Format: `## [YYYY-MM-DD] Decision title` → **Decision**, **Context**, **Altern
 **Result:** Re-run scored faithfulness 5.0/5 (up from 4.3); no-hallucination rate held at 1.0. Baseline preserved in eval/results_baseline.json for the before/after.
 
 **Revisit if:** later cases show speculation creeping back, or a real signal case gets over-constrained into blandness — then move some of this into few-shot examples rather than rules.
+
+---
+
+## [2026-07] Production model — gpt-4o-mini over gpt-4o (eval-driven)
+**Decision:** Switch DEFAULT_MODEL from gpt-4o to gpt-4o-mini for brief generation.
+
+**Context:** Ran the full golden set through both models with the same deterministic checks and a fixed judge (gpt-4o, so faithfulness is on one scale). gpt-4o-mini matched gpt-4o on the hard guardrails — no-hallucination rate 1.0 and has_signal accuracy 1.0 — while costing ~17x less per brief ($0.00019 vs $0.00329).
+
+**Alternatives considered:** Stay on gpt-4o (safer-sounding, no evidence it's actually better here); jump to a frontier model (higher cost, no eval justification yet).
+
+**Why:** The guardrails that matter for this product (never fabricate a breach/CVE/number) held identically on mini. Faithfulness was within run-to-run noise between the two, so there is no quality justification for paying 17x more. Cost matters at scale (watchlist re-runs briefs continuously).
+
+**Nuance / what I learned:** Single-pass faithfulness is noisy (gpt-4o scored 4.6 and 5.0 on different passes at temperature 0.2). So the comparison harness now runs 3 passes/model and reports mean ± stdev; the model decision rests on the stable guardrail metrics plus a faithfulness range, not one lucky draw.
+
+**Revisit if:** faithfulness stdev turns out large once multi-pass numbers are in, a harder/expanded golden set exposes a quality gap, or a cheaper/stronger model ships. The judge should also move to a different provider (Anthropic) to remove same-family grading bias.
