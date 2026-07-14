@@ -171,3 +171,11 @@ Format: `## [YYYY-MM-DD] Decision title` → **Decision**, **Context**, **Altern
 **Confirmed model weakness (now evidence-backed):** when context contains another company's CVE, the generator sometimes manufactures a sales hook from it. Fix candidate: a prompt rule that an unrelated company's vulnerability must be explicitly excluded from the opener and key points, not spun into third-party risk. Deferred as the next generation improvement.
 
 **Revisit if:** the OpenAI/Claude faithfulness gap widens on future runs (would argue for retiring the OpenAI judge entirely), or a third provider is added to triangulate.
+
+## [2026-07] Misattribution guardrail (prompt rule 2a)
+The independent Claude judge caught the one weakness the same-family (OpenAI) judge missed:
+on `misattributed-cve`, the brief pitched Larkspur Analytics' CVE to prospect Larkfield
+(OpenAI faithfulness 5/5, Claude 2/5). Added prompt rule 2a to src/brief.py: a breach/CVE/
+incident belongs to a company only if the context names that same company; a different
+company's event (even a similar name) is not a signal and must not be reframed as third-party
+risk unless the context explicitly ties it to the prospect. Verify on next eval run.
