@@ -49,18 +49,24 @@ def _build_query(company: str, breach_keywords: List[str]) -> str:
     return f'"{company}" AND ({terms})'
 
 
-def fetch(query: str, max_records: int = 15) -> List[dict]:
-    """Return raw NewsAPI article records for a query. Network call; may raise on HTTP/API error."""
-    resp = requests.get(
-        NEWSAPI_URL,
-        params={
-            "q": query,
-            "sortBy": "publishedAt",
-            "pageSize": max_records,
-            "apiKey": _api_key(),
-        },
-        timeout=30,
-    )
+def fetch(query: str, max_records: int = 15, language: str | None = None,
+          from_date: str | None = None) -> List[dict]:
+    """Return raw NewsAPI article records for a query. Network call; may raise on HTTP/API error.
+
+    `language` (e.g. "en") restricts results to one language; `from_date` (ISO date, e.g.
+    "2026-04-15") drops anything older. Both default to None = NewsAPI's own defaults, so the
+    watchlist ingest path is unchanged; the live path passes them for English + recent signals."""
+    params = {
+        "q": query,
+        "sortBy": "publishedAt",
+        "pageSize": max_records,
+        "apiKey": _api_key(),
+    }
+    if language:
+        params["language"] = language
+    if from_date:
+        params["from"] = from_date
+    resp = requests.get(NEWSAPI_URL, params=params, timeout=30)
     resp.raise_for_status()
     data = resp.json()
     # NewsAPI signals problems in-body with status="error" even on some 200s.

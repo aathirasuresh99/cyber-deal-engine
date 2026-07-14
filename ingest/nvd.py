@@ -38,13 +38,19 @@ def _english_description(cve: dict) -> str:
     return ""
 
 
-def fetch(keyword: str, results: int = 10) -> List[dict]:
-    """Return raw NVD CVE items matching a keyword. Network call; may raise on HTTP error."""
-    resp = requests.get(
-        NVD_API,
-        params={"keywordSearch": keyword, "resultsPerPage": results},
-        timeout=30,
-    )
+def fetch(keyword: str, results: int = 10,
+          pub_start: str | None = None, pub_end: str | None = None) -> List[dict]:
+    """Return raw NVD CVE items matching a keyword. Network call; may raise on HTTP error.
+
+    `pub_start`/`pub_end` (ISO 8601, e.g. "2026-04-15T00:00:00.000") restrict to CVEs published in
+    that window — NVD requires BOTH when either is given, and caps the range at 120 days. Default
+    None = no date filter, so the watchlist ingest path is unchanged; the live path passes a
+    ~3-month window. NVD descriptions are already English (we select lang=='en')."""
+    params: dict = {"keywordSearch": keyword, "resultsPerPage": results}
+    if pub_start and pub_end:
+        params["pubStartDate"] = pub_start
+        params["pubEndDate"] = pub_end
+    resp = requests.get(NVD_API, params=params, timeout=30)
     resp.raise_for_status()
     return resp.json().get("vulnerabilities", [])
 
