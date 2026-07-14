@@ -238,3 +238,13 @@ precision trades hallucination fixes for erased signal. Two follow-ups:
   (2) Fix ablation confound — have both arms share the agent's attempt-0 draft so the comparison
       isolates the loop's effect instead of mixing in generation variance.
 Both deferred pending user go-ahead (each needs a live eval run to re-verify).
+
+## [2026-07] Critic precision fix (multi-company false-positive)
+Fixed the adv-buried-signal defect: the critic flagged "Quill Health confirmed a data breach"
+as unsupported even though it was verbatim in the context, because the context also named
+unrelated firms (ApexFin/ZenPay/BrightCRM). Added a PRECISION rule to _CRITIC_SYSTEM: confirm a
+fact is genuinely ABSENT before flagging; a brief repeating the prospect's own in-context event is
+supported even when other companies are mentioned; only flag when the context lacks the claim or
+attributes it to a different company; when unsure, re-read and don't flag what is actually present.
+Verify on next adversarial run: adv-buried-signal should stop losing its real signal (has_signal
+should stay True, no needless revisions), while adv-multi-company-noise should still be caught.
