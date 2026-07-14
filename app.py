@@ -5,6 +5,7 @@ Run: streamlit run app.py"""
 import streamlit as st
 
 from src.brief import safe_generate
+from src.agent import generate_brief_reflective
 from src.store import counts_by_company
 from src import retrieve
 
@@ -33,12 +34,35 @@ def render_brief(result):
         st.error(f"Generation failed: {result.get('error')}")
 
 
+def render_agent_result(res):
+    """Render a reflective AgentResult: the brief plus the self-critique trace."""
+    if res.error or res.brief is None:
+        st.error(f"Generation failed: {res.error}")
+        return
+    render_brief(res.brief)
+    label = "clean on first draft" if res.revisions == 0 else f"{res.revisions} revision(s)"
+    st.caption(f"Reflection agent: {label} · final verdict {'faithful' if res.faithful else 'unfaithful'}")
+    with st.expander("Self-critique trace"):
+        for p in res.passes:
+            verdict = "✅ faithful" if p.faithful else "⚠️ unfaithful"
+            st.markdown(f"**Attempt {p.attempt}** — {verdict}")
+            if p.unsupported_claims:
+                for c in p.unsupported_claims:
+                    st.markdown(f"- {c}")
+            if p.notes:
+                st.caption(p.notes)
+
+
 watchlist_tab, paste_tab = st.tabs(["📇 Watchlist", "📋 Paste your own"])
 
 with watchlist_tab:
     counts = counts_by_company()
     if not counts:
-        st.info("No signals stored yet. Run `python -m ingest.run_ingest` first.")
+        st.info(
+            "No signals stored yet. This mode reads a local signal database "
+            "(`python -m ingest.run_ingest` to populate it). On the public demo it's empty — "
+            "use the **Paste your own** tab to try the engine on any text."
+        )
     else:
         # Show each company with how many signals we hold.
         options = sorted(counts.keys())
@@ -68,6 +92,15 @@ with paste_tab:
         placeholder="Paste raw signals here.",
         key="p_context",
     )
+    reflect = st.checkbox(
+        "Use reflection agent (draft → self-critique → revise)",
+        help="Phase 4: the agent critiques its own draft against the context and revises if it "
+             "finds an unsupported claim. Costs extra calls; shows the critique trace.",
+        key="p_reflect",
+    )
     if st.button("Generate brief", type="primary", key="p_btn") and company_p:
         with st.spinner("Thinking..."):
-            render_brief(safe_generate(company_p, context_p))
+            if reflect:
+                render_agent_result(generate_brief_reflective(company_p, context_p))
+            else:
+                render_brief(safe_generate(company_p, context_p))
