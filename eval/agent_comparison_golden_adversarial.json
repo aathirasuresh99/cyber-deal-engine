@@ -4,25 +4,22 @@
     "cases_errored": 0,
     "plain": {
       "n": 10,
-      "no_hallucination_rate": 0.6,
-      "has_signal_accuracy": 1.0,
-      "judge_faithfulness_avg": 4.6
+      "no_hallucination_rate": 0.7,
+      "has_signal_accuracy": 0.9,
+      "judge_faithfulness_avg": 4.89
     },
     "agent": {
       "n": 10,
       "no_hallucination_rate": 0.8,
-      "has_signal_accuracy": 0.9,
-      "judge_faithfulness_avg": 4.4
+      "has_signal_accuracy": 1.0,
+      "judge_faithfulness_avg": 4.2
     },
-    "cases_revised": 3,
+    "cases_revised": 1,
     "revised_ids": [
-      "adv-multi-company-noise",
-      "adv-buried-signal",
-      "adv-competitor-breach"
+      "adv-multi-company-noise"
     ],
     "flips_to_clean": [
-      "adv-multi-company-noise",
-      "adv-two-cves-one-other"
+      "adv-multi-company-noise"
     ],
     "flips_to_dirty": []
   },
@@ -31,7 +28,7 @@
       "id": "adv-multi-company-noise",
       "category": "multi_company_noise",
       "plain": {
-        "has_signal_correct": true,
+        "has_signal_correct": false,
         "clean": false,
         "faithfulness": 5
       },
@@ -47,9 +44,8 @@
           "attempt": 0,
           "faithful": false,
           "flags": [
-            "RivalBank disclosed a breach affecting 500,000 customer records",
-            "the recent ransomware attack on CloudNine underscores the growing threat landscape for fintech companies",
-            "the recent breach at RivalBank affecting 500,000 records"
+            "RivalBank disclosed a breach of 500,000 customer records",
+            "the recent breach at RivalBank affecting 500,000 customer records"
           ]
         },
         {
@@ -70,7 +66,7 @@
       "agent": {
         "has_signal_correct": true,
         "clean": false,
-        "faithfulness": 3
+        "faithfulness": 2
       },
       "revisions": 0,
       "agent_faithful_flag": true,
@@ -91,33 +87,17 @@
         "faithfulness": 5
       },
       "agent": {
-        "has_signal_correct": false,
+        "has_signal_correct": true,
         "clean": true,
-        "faithfulness": 3
+        "faithfulness": 5
       },
-      "revisions": 2,
-      "agent_faithful_flag": false,
+      "revisions": 0,
+      "agent_faithful_flag": true,
       "critic_passes": [
         {
           "attempt": 0,
-          "faithful": false,
-          "flags": [
-            "Quill Health confirmed a data breach exposing patient records."
-          ]
-        },
-        {
-          "attempt": 1,
-          "faithful": false,
-          "flags": [
-            "Quill Health confirmed a data breach exposing patient records"
-          ]
-        },
-        {
-          "attempt": 2,
-          "faithful": false,
-          "flags": [
-            "Quill Health confirmed a data breach exposing patient records."
-          ]
+          "faithful": true,
+          "flags": []
         }
       ]
     },
@@ -127,7 +107,7 @@
       "plain": {
         "has_signal_correct": true,
         "clean": true,
-        "faithfulness": 3
+        "faithfulness": null
       },
       "agent": {
         "has_signal_correct": true,
@@ -157,18 +137,11 @@
         "clean": false,
         "faithfulness": 5
       },
-      "revisions": 1,
+      "revisions": 0,
       "agent_faithful_flag": true,
       "critic_passes": [
         {
           "attempt": 0,
-          "faithful": false,
-          "flags": [
-            "Onyx Assurance recently disclosed a breach affecting 2 million policyholder records."
-          ]
-        },
-        {
-          "attempt": 1,
           "faithful": true,
           "flags": []
         }
@@ -185,7 +158,7 @@
       "agent": {
         "has_signal_correct": true,
         "clean": true,
-        "faithfulness": 5
+        "faithfulness": 4
       },
       "revisions": 0,
       "agent_faithful_flag": true,
@@ -208,7 +181,7 @@
       "agent": {
         "has_signal_correct": true,
         "clean": true,
-        "faithfulness": 5
+        "faithfulness": 3
       },
       "revisions": 0,
       "agent_faithful_flag": true,
@@ -226,7 +199,7 @@
       "plain": {
         "has_signal_correct": true,
         "clean": true,
-        "faithfulness": 5
+        "faithfulness": 4
       },
       "agent": {
         "has_signal_correct": true,
@@ -248,8 +221,8 @@
       "category": "multi_company_noise",
       "plain": {
         "has_signal_correct": true,
-        "clean": false,
-        "faithfulness": 3
+        "clean": true,
+        "faithfulness": 5
       },
       "agent": {
         "has_signal_correct": true,

@@ -248,3 +248,13 @@ supported even when other companies are mentioned; only flag when the context la
 attributes it to a different company; when unsure, re-read and don't flag what is actually present.
 Verify on next adversarial run: adv-buried-signal should stop losing its real signal (has_signal
 should stay True, no needless revisions), while adv-multi-company-noise should still be caught.
+
+## [2026-07] Critic precision fix VERIFIED on adversarial re-run
+Re-ran the adversarial ablation after the precision rule. Result: adv-buried-signal now passes on
+attempt 0 (0 revisions, faithful, real signal preserved) — the false-positive is eliminated. The
+true-positive survived: adv-multi-company-noise still revised dirty->clean. has_signal accuracy
+0.9->1.0, no-hallucination 0.7->0.8, flips_to_dirty empty. The agent's lower faithfulness aggregate
+(4.2 vs plain 4.89) is entirely a confound: all faithfulness deltas are on rev=0 cases (loop never
+ran) = variance between independently drafted arms; the one revised case held faithfulness at 5.
+This is now the concrete motivation for the shared-draft ablation (follow-up #2): make both arms
+start from the agent's attempt-0 draft so the comparison isolates the loop, not drafting noise.

@@ -155,31 +155,38 @@ cases the tuned prompt is more likely to miss: multi-company news roundups, simi
 low-severity CVEs that tempt exaggeration, and a competitor's breach sitting next to the
 prospect's own CVE (`python -m eval.compare_agent golden_adversarial.jsonl`).
 
+The first adversarial run exposed both an upside and a real defect, which drove a critic fix. The
+table below is *after* that fix:
+
 | metric | plain | agent |
 |---|---|---|
-| no-hallucination rate | 0.6 | 0.8 |
-| has_signal accuracy | 1.0 | 0.9 |
-| judge faithfulness avg | 4.6 | 4.4 |
+| no-hallucination rate | 0.7 | 0.8 |
+| has_signal accuracy | 0.9 | 1.0 |
+| judge faithfulness avg | 4.89 | 4.2 |
 
-The aggregates say "north star up, secondary metrics down," but the **per-case trace is the
-honest view** — with only 10 cases and two independently-drafted arms, the aggregates mix loop
-effects with generation noise. What actually happened:
+With only 10 cases and two independently-drafted arms, the aggregates mix loop effects with
+generation noise, so the **per-case trace is the honest view**:
 
 - **Reflection worked (as designed).** On the multi-company roundup, the plain draft pulled a
   *different* company's breach into the prospect's brief. The critic caught it and the revision
   removed it — a real dirty→clean fix. This is the failure class the loop targets, and it landed.
-- **Reflection backfired.** On the "buried signal" case, the prospect *had* a real, in-context
-  breach — but surrounded by unrelated funding noise, the critic **false-positived**, flagged the
-  true claim as unsupported, and the loop deleted the real signal (has_signal flipped, faithfulness
-  5→3). An over-eager self-critic can erase truth.
-- **Two other aggregate swings were noise** — they occurred with zero revisions, so they reflect
-  variance between independently generated drafts, not the loop.
+- **The critic first backfired, then was fixed.** On the "buried signal" case, the prospect *had*
+  a real, in-context breach surrounded by unrelated funding noise. In the first run the critic
+  **false-positived** — flagged the true claim as unsupported — and the loop deleted the real
+  signal (has_signal flipped, faithfulness 5→3). The fix was a *precision* rule: confirm a fact is
+  genuinely absent before flagging, and treat the prospect's own in-context event as supported even
+  when other companies are named. After it, that case passes on the first try (0 revisions, signal
+  preserved) while the multi-company catch still fires — so `has_signal` accuracy went 0.9→1.0 with
+  no lost true-positive.
+- **The remaining faithfulness gap is a confound, not a regression.** Every case where the two arms
+  disagree on faithfulness has `rev=0` — the loop never ran on it — so the gap is variance between
+  independently generated drafts. The one case the loop actually revised held faithfulness at 5.
 
-The real lesson is sharper than "agents help": **a reflection loop is only as good as its critic's
-precision.** A high-recall / low-precision critic buys hallucination fixes at the cost of erasing
-real signal. Two follow-ups fall out of this directly: (1) raise critic precision so it stops
-flagging in-context claims in noisy multi-company text; (2) fix the ablation confound by having
-both arms share the agent's first draft, isolating the loop's true effect. (See `DECISIONS.md`.)
+The lesson is sharper than "agents help": **a reflection loop is only as good as its critic's
+precision** — a high-recall/low-precision critic trades hallucination fixes for erased signal. And
+the faithfulness confound is the clean argument for the next fix: have both arms share the agent's
+first draft, so the ablation measures the loop's effect instead of drafting noise. (See
+`DECISIONS.md`.)
 
 ## Design decisions
 See `DECISIONS.md` for scope choices and *why* (target market, coverage model, sources, hero insight).
