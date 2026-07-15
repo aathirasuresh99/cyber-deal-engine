@@ -94,8 +94,8 @@ fabrication guards). Results are written to `eval/results.json` so runs are comp
 | metric | value |
 |---|---|
 | no-hallucination rate | **1.0** |
-| has_signal accuracy | 0.939 |
-| judge faithfulness avg | 4.94 / 5 |
+| has_signal accuracy | 0.97 |
+| judge faithfulness avg | 4.97 / 5 |
 
 The golden set was **re-labelled** for the full buying-trigger taxonomy: three business-event cases
 that were "no signal" under the breach/vuln-only rule are now positive (new-office/hiring = growth,
@@ -105,11 +105,15 @@ migration, SOC 2 customer demand, DPDP deadline, cyber-insurance renewal, peer b
 labelled no-signal. Fabrication guardrails (never invent a CVE/date/number/incident) now scan every
 brief field including the Phase 5 ones.
 
-The two `has_signal` misses are both the *softest* triggers — a new office + hiring (growth) and a
-Series B raise (fundraising), each with zero security context. The model calls these "no signal,"
-erring conservative: it under-detects a soft business trigger rather than fabricating one, so the
-no-hallucination rate stays 1.0. That trade (recall on the softest triggers vs. never over-firing on
-routine funding/growth news) is a deliberate characteristic, not a defect. A separate run caught a
+The one remaining `has_signal` miss is the *softest* trigger — a Series B raise bundled with a
+product launch and zero security context (`product-launch-only`); the model still reads it as "no
+signal." Recall improved from 0.939 to **0.97** after a prompt rule (2b) that treats a prospect's
+*own* named fundraise/M&A/growth event as a trigger even absent a security incident: that fix flipped
+the new-office/hiring growth case to a correct positive, leaving only the pure fundraise-plus-launch
+case. The model errs conservative here — it under-detects a soft business trigger rather than
+fabricating one, so the no-hallucination rate stays 1.0. That trade (recall on the softest triggers
+vs. never over-firing on routine funding/growth news) is a deliberate characteristic, not a defect.
+A separate run caught a
 real prompt gap: on a noisy multi-company case the model pulled an *unrelated* firm's record-quarter
 news into the brief as fake "competitive scrutiny" — both the deterministic forbidden-string guard
 and the judge flagged it, and a prompt rule (a different company's non-security business news is
