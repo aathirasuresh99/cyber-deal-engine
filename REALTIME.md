@@ -91,3 +91,32 @@ why on-demand live fetch is the primary mechanism. To make scheduled refresh dur
 
 `src.live.live_context(..., persist=True)` can also seed the store from a live lookup — an easy way
 to warm the watchlist with companies a rep actually briefed.
+
+## 4. Making the hosted Watchlist tab persist (Neon Postgres)
+
+The Watchlist tab is empty on the public demo because SQLite is wiped on restart. Point the store at
+a free hosted Postgres and it survives. `src/store.py` already reads `SIGNALS_DB_URL`, so this is
+config only — no code change (the Postgres driver `psycopg2-binary` is already in `requirements.txt`).
+
+1. **Create a free Neon Postgres.** Sign up at neon.tech → new project → copy the **connection
+   string**. It looks like `postgresql://user:pass@ep-xxx.region.aws.neon.tech/dbname?sslmode=require`.
+   SQLAlchemy wants the `postgresql://` scheme (if Neon shows `postgres://`, just change the prefix).
+
+2. **Give the Streamlit app the URL.** In the app dashboard → *Settings → Secrets*, add:
+   ```toml
+   SIGNALS_DB_URL = "postgresql://user:pass@ep-xxx.region.aws.neon.tech/dbname?sslmode=require"
+   ```
+   The app reads it via `os.getenv`; the tables auto-create on first connect (`Base.metadata.create_all`).
+
+3. **Give the scheduled refresh the same URL.** Add `SIGNALS_DB_URL` as a GitHub repo secret and pass
+   it to `run_ingest` (the workflow in section 2 already wires it), so the cron writes into the same
+   Postgres the app reads.
+
+4. **Seed it once** so the tab isn't empty on first load — run either locally or from the Action:
+   ```bash
+   SIGNALS_DB_URL="postgresql://...:...@...neon.tech/...?sslmode=require" \
+     python -m ingest.run_ingest
+   ```
+
+After that the **📇 Watchlist** tab on the hosted demo shows stored signals, and the daily refresh
+keeps them current. Live brief stays the zero-setup path; this just makes the stored path durable too.

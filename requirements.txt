@@ -5,3 +5,6 @@ pydantic>=2.7
 streamlit>=1.36
 requests>=2.31
 sqlalchemy>=2.0
+# Postgres driver — only needed when SIGNALS_DB_URL points at Postgres (e.g. the hosted demo).
+# Harmless locally, where the default is file-based SQLite.
+psycopg2-binary>=2.9
