@@ -161,7 +161,8 @@ def main() -> int:
 
     if total == 0:
         print("No new signals since last run — no email sent.")
-        _save_seen(seen)  # still prune old entries
+        if not dry_run:
+            _save_seen(seen)  # still prune old entries (a preview must not mutate state)
         return 0
 
     html = render_email(new_by_company)
@@ -171,13 +172,13 @@ def main() -> int:
     )
 
     if dry_run:
-        print("DRY RUN — no email sent. Body below:\n")
+        print("DRY RUN — no email sent, seen-state NOT modified. Body below:\n")
         print(html)
-    else:
-        send_email(html, subject)
-        print(f"Sent: {subject}")
+        return 0
 
-    # Persist only after a successful send (or in dry-run) so a send failure retries next time.
+    send_email(html, subject)
+    print(f"Sent: {subject}")
+    # Persist only after a successful send, so a send failure retries the same signals next run.
     _save_seen(seen)
     return 0
 

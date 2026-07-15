@@ -23,7 +23,7 @@ from datetime import datetime, timedelta, timezone
 from typing import List, Optional
 
 from src.config import ACTIVE_MARKET, MarketProfile
-from src.retrieve import _mentions_company, rank_by_relevance
+from src.retrieve import _mentions_company, is_plugin_collision, rank_by_relevance
 
 
 @dataclass
@@ -122,9 +122,11 @@ def _nvd_signals(company: str, results: int, notes: List[str], cutoff: datetime)
             body=desc,
             published=nvd._parse_published(cve.get("published", "")),
         )
-        # Precision filter: bare NVD keyword search matches product/dictionary words too.
+        # Precision filter: bare NVD keyword search matches product/dictionary words too, and also
+        # third-party CMS/e-commerce plugins that merely carry the company name in their title.
         # Recency backstop in case the API returns anything outside the requested window.
-        if _mentions_company(sig, company) and _is_recent(sig.published, cutoff):
+        if (_mentions_company(sig, company) and not is_plugin_collision(sig)
+                and _is_recent(sig.published, cutoff)):
             out.append(sig)
     notes.append(f"nvd: {len(out)} CVE(s) naming the company in window")
     return out

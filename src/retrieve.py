@@ -44,11 +44,29 @@ def _mentions_company(sig: Signal, company: str) -> bool:
     return re.search(pattern, f"{sig.title} {sig.body}", flags=re.IGNORECASE) is not None
 
 
+# A second, harder NVD false positive: a CVE in a third-party CMS/e-commerce plugin whose *title*
+# happens to contain the company name — e.g. "Razorpay Payment Links for WooCommerce" or "Zoho CRM
+# Client Portal plugin for WordPress". These name the company but are NOT vulnerabilities in the
+# prospect's own product; for a SaaS/fintech prospect they're name-collision noise. The reliable
+# tell is that the description names a plugin ecosystem (WordPress/WooCommerce/etc.). Heuristic by
+# design — it assumes the prospect is not itself a CMS-plugin vendor (true for the watchlist).
+_PLUGIN_PLATFORM_RE = re.compile(
+    r"\b(wordpress|woocommerce|drupal|joomla|magento|typo3|prestashop|shopify)\b",
+    re.IGNORECASE,
+)
+
+
+def is_plugin_collision(sig: Signal) -> bool:
+    """True if an NVD hit looks like a third-party CMS/e-commerce plugin (name-collision noise)."""
+    return bool(_PLUGIN_PLATFORM_RE.search(f"{sig.title} {sig.body}"))
+
+
 def relevant_signals(company: str, limit: int = 50) -> List[Signal]:
-    """Stage 1 — precision filter. Keep news as-is; keep NVD only when it names the company."""
+    """Stage 1 — precision filter. Keep news as-is; keep NVD only when it names the company AND is
+    not a third-party CMS/e-commerce plugin collision."""
     kept: List[Signal] = []
     for sig in get_signals(company, limit):
-        if sig.source == "nvd" and not _mentions_company(sig, company):
+        if sig.source == "nvd" and (not _mentions_company(sig, company) or is_plugin_collision(sig)):
             continue
         kept.append(sig)
     return kept

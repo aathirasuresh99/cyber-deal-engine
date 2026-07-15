@@ -1,1 +1,5 @@
-{}
+{
+  "https://nvd.nist.gov/vuln/detail/CVE-2025-5017": "2026-07-15T03:31:32.803836+00:00",
+  "https://nvd.nist.gov/vuln/detail/CVE-2026-10865": "2026-07-15T03:31:32.803836+00:00",
+  "https://nvd.nist.gov/vuln/detail/CVE-2026-57424": "2026-07-15T03:31:32.803836+00:00"
+}
